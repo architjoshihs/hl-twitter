@@ -1,16 +1,16 @@
 === HL Twitter ===
 Contributors: Dachande663
 Donate link: http://hybridlogic.co.uk/code/wordpress-plugins/hl-twitter/
-Tags: xbox, xbox360, microsoft, gamertag, xboxlive, live, hybridlogic
+Tags: twitter, tweet, post, auto tweet, social, social media, backup, hybridlogic
 Requires at least: 3.0.0
 Tested up to: 3.0.1
 Stable tag: trunk
 
-HL Twitter stores tweets from multiple accounts and displays them via a customisable widget.
+HL Twitter stores tweets from multiple accounts and displays them via a customisable widget as well as supprting auto-tweeting new posts.
 
 == Description ==
 
-HL Twitter lets you display your tweets as a widget in your sidebar. But it also does a whole lot more. You can track multiple Twitter accounts and store all of the tweets on your blog indefinitely (currently Twitter only keep your 3,200 most recent tweets) as well as pulling in any tweets that you reply to for future reference.
+HL Twitter lets you display your tweets as a widget in your sidebar. But it also does a whole lot more. You can track multiple Twitter accounts and store all of the tweets on your blog indefinitely (currently Twitter only keep your 3,200 most recent tweets) as well as pulling in any tweets that you reply to for future reference. You can then tweet from your Dashboard or have HL Twitter automatically tweet your new posts with a customisable message.
 
 == Installation ==
 
@@ -35,6 +35,10 @@ Twitter currently limit access to the 3,200 most recent tweets for an account. I
 = Why aren't all my tweets being pulled in? =
 
 Twitter limits applications to a set number of requests per hour. If you are tracking a lot of people you may hit this limit before HL Twitter has finished importing all new tweets.
+
+= How do I enabled auto-tweeting? =
+
+Auto-tweeting, having HL Twitter tweet a new message whenever you publish a post or page, is disabled by default. To enable it go to Twitter -> Settings in your WordPress admin. You can also change the default text that is shown in the tweet. When publishing a new post or page, you will not be able to choose whether or not to tweet for this post.
 
 == Screenshots ==
 
@@ -64,6 +68,11 @@ Twitter limits applications to a set number of requests per hour. If you are tra
 * First public release
 * Added widget + controls
 * Added WordPress event scheduling handlers
+
+= 2010.9.12 =
+
+* Added auto-tweet ability
+* Added Feedback panel
 
 == Upgrade Notice ==
 

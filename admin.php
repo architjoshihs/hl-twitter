@@ -12,7 +12,48 @@ function hl_twitter_admin_menu() {
 	add_meta_box('hl_twitter_box', 'Tweet Post', 'hl_twitter_post_box', 'post', 'advanced');
 	add_meta_box('hl_twitter_box', 'Tweet Page', 'hl_twitter_post_box', 'page', 'advanced');
 	
+	# Feedback page
+	add_submenu_page('hl_twitter', 'Feedback', 'Feedback', 'manage_options', 'hl_twitter_feedback', 'hl_twitter_feedback');
+	
 } // end func: hl_twitter_admin_menu
+
+
+
+/*
+	Feedback page via HL Feedback
+*/
+function hl_twitter_feedback() {
+	$feedback = new hl_feedback('hl_twitter', HL_TWITTER_DIR.'hl_twitter.php');
+	$feedback->render();
+} // end func: hl_twitter_feedback
+
+
+
+
+/*
+	Called whenever a post is published (or saved when published)
+*/
+function hl_twitter_publish_post($post_id) {
+	
+	if($_POST['hl_twitter_auto_tweet']!='on') return $post_id;
+	
+	$post_id = intval($post_id);
+	$revision_id = wp_is_post_revision($post_id);
+	if($revision_id) $post_id = $revision_id;
+	
+	$prior_auto_tweet = get_post_meta($post_id, HL_TWITTER_AUTO_TWEET_POSTMETA, true);
+	if($prior_auto_tweet!='') return $post_id;
+	
+	$tweet = stripslashes($_POST['hl_twitter_box_tweet']);
+	if($tweet=='') $tweet = hl_twitter_generate_post_tweet_text($post->ID);
+	if(strlen($tweet)>140) $tweet = substr($tweet,0,137).'...';
+	
+	$response = hl_twitter_tweet($tweet);
+	if($response) {
+		update_post_meta($post_id, HL_TWITTER_AUTO_TWEET_POSTMETA, $tweet);
+	}
+	
+} // end func: hl_twitter_publish_post
 
 
 
@@ -70,8 +111,6 @@ function hl_twitter_dashboard_widget() {
 
 
 
-
-
 /*
 	AJAX handler for new tweets
 */
@@ -100,29 +139,22 @@ add_action('wp_ajax_hl_twitter_ajax_new_tweet', 'hl_twitter_ajax_new_tweet');
 
 
 
-
-
 /*
 	Display a tweet this link box on post/page pages
 */
 function hl_twitter_post_box($post) {
 	
+	$auto_tweet_enabled = (bool) get_option(HL_TWITTER_AUTO_TWEET_SETTINGS, false);
+	
 	if($post->post_status!='publish') {
-		echo '<p>When published, you can tweet a link to this '.$post->post_type.' from here.</p>';
+		if($auto_tweet_enabled) {
+			echo '<p><input type="checkbox" name="hl_twitter_auto_tweet" checked="checked" /> If ticked, a tweet will be automatically created for this '.$post->post_type.' based on your Twitter settings.</p>';
+		} else {
+			echo '<p>When you have published this '.$post->post_type.', you can tweet a link to it from here.</p>';
+		}
 		return;
 	}
-	
-	$tweet_format = get_option(HL_TWITTER_TWEET_FORMAT, 'I just posted %title%, read it here: %shortlink%');
-	
-	$search = array('%title%', '%shortlink%', '%permalink%');
-	$post_title = get_the_title($post->ID);
-	$post_permalink = get_permalink($post->ID);
-	$post_shortlink = wp_get_shortlink($post->ID);
-	if($post_shortlink=='') $post_shortlink = $post_permalink;
-	$replace = array($post_title, $post_shortlink, $post_permalink);
-	
-	$tweet = str_replace($search, $replace, $tweet_format);
-	
+	$tweet = hl_twitter_generate_post_tweet_text($post->ID);
 	?>
 	
 	<p>
@@ -1004,12 +1036,16 @@ function hl_twitter_settings() {
 	
 	$object = new stdClass;
 	$object->tweet_format = get_option(HL_TWITTER_TWEET_FORMAT, 'I just posted %title%, read it here: %shortlink%');
+	$object->auto_tweet = (bool) get_option(HL_TWITTER_AUTO_TWEET_SETTINGS, false);
 	$object->update_frequency = get_option(HL_TWITTER_UPDATE_FREQUENCY, 'hl_1hr');
 	
 	if($_POST['submit']) {
 		
 		$object->tweet_format = stripslashes($_POST['object']['tweet_format']);
 		update_option(HL_TWITTER_TWEET_FORMAT, $object->tweet_format);
+		
+		$object->auto_tweet = ($_POST['object']['auto_tweet']=='on')?true:false;
+		update_option(HL_TWITTER_AUTO_TWEET_SETTINGS, $object->auto_tweet);
 		
 		if(array_key_exists($_POST['object']['update_frequency'], $frequencies)) {
 			$object->update_frequency = $_POST['object']['update_frequency'];
@@ -1043,7 +1079,13 @@ function hl_twitter_settings() {
 					<li><code>%shortlink%</code> The shortlink for this post e.g. mysite.com/?p=123 or bit.ly/abc123</li>
 				</ul>
 			</tr>
-			
+			<tr>
+				<th scope="row">Automatically tweet?</th>
+				<td>
+					<input type="checkbox" name="object[auto_tweet]" <?php if($object->auto_tweet): ?>checked="checked"<?php endif; ?> />
+					<br /><span class="description">If enabled, posts will be automatically tweeted when they are first published.</span>
+				</td>
+			</tr>
 			<tr>
 				<th scope="row">Frequency</th>
 				<td>

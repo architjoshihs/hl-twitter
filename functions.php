@@ -73,6 +73,29 @@ function hl_twitter_tweet($tweet) {
 
 
 
+/*
+	Generates the string to be genereated for a post
+*/
+function hl_twitter_generate_post_tweet_text($post_id) {
+	
+	$prior_auto_tweet = get_post_meta($post_id, HL_TWITTER_AUTO_TWEET_POSTMETA, true);
+	if($prior_auto_tweet!='') return $prior_auto_tweet;
+	
+	$tweet_format = get_option(HL_TWITTER_TWEET_FORMAT, 'I just posted %title%, read it here: %shortlink%');
+	
+	$search = array('%title%', '%shortlink%', '%permalink%');
+	$post_title = get_the_title($post_id);
+	$post_permalink = get_permalink($post_id);
+	$post_shortlink = wp_get_shortlink($post_id);
+	if($post_shortlink=='') $post_shortlink = $post_permalink;
+	$replace = array($post_title, $post_shortlink, $post_permalink);
+	
+	$tweet = str_replace($search, $replace, $tweet_format);
+	
+	return $tweet;
+	
+} // end func: hl_twitter_generate_post_tweet_text
+
 
 
 /*
@@ -149,7 +172,7 @@ function hl_twitter_install() {
 	 * The only data tracked is an non-reversible hash of the site URL so duplicates
 	 * aren't recorded. It is so installations can be shown on the plugin website.
 	 */
-	wp_remote_get('http://hybridlogic.co.uk/wp-plugin-activation.php?plugin=hl_twitter&hash='.md5(get_bloginfo('url')));
+	wp_remote_get('http://hybridlogic.co.uk/hl-plugin-activation.php?plugin=hl_twitter&hash='.md5(get_bloginfo('url')));
 	
 	$sql = "
 		CREATE TABLE `".$table_prefix.HL_TWITTER_DB_PREFIX."replies` (
