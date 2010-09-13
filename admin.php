@@ -359,7 +359,7 @@ jQuery(document).ready(function($){
 			<?php if($num_objects>0): ?>
 				<?php foreach($objects as $object): ?>
 					<tr>
-						<td><a href="admin.php?page=hl_twitter_users&amp;action=edit&amp;id=<?php echo hl_e($object->twitter_user_id); ?>"><img src="<?php echo hl_e($object->avatar); ?>" /></a></td>
+						<td><a href="admin.php?page=hl_twitter_users&amp;action=edit&amp;id=<?php echo hl_e($object->twitter_user_id); ?>"><img src="<?php echo hl_twitter_get_avatar($object->avatar); ?>" /></a></td>
 						<td>
 							<a href="admin.php?page=hl_twitter_users&amp;action=edit&amp;id=<?php echo hl_e($object->twitter_user_id); ?>"><?php echo hl_e($object->name); ?></a><br />
 							<em><?php echo hl_e($object->screen_name); ?></em>
@@ -600,7 +600,7 @@ function hl_twitter_admin_view_users() {
 			<?php if($num_objects>0): ?>
 				<?php foreach($objects as $object): ?>
 					<tr>
-						<td><a href="admin.php?page=hl_twitter_users&amp;action=edit&amp;id=<?php echo hl_e($object->twitter_user_id); ?>"><img src="<?php echo $object->avatar; ?>" /></a></td>
+						<td><a href="admin.php?page=hl_twitter_users&amp;action=edit&amp;id=<?php echo hl_e($object->twitter_user_id); ?>"><img src="<?php echo hl_twitter_get_avatar($object->avatar); ?>" /></a></td>
 						<td>
 							<a href="admin.php?page=hl_twitter_users&amp;action=edit&amp;id=<?php echo hl_e($object->twitter_user_id); ?>"><?php echo hl_e($object->name); ?></a><br />
 							<em><?php echo hl_e($object->screen_name); ?></em>
