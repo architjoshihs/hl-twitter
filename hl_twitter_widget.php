@@ -78,7 +78,7 @@
 <?php if($num_tweets>0): ?>
 	<ul class="hl_recent_tweets">
 		<?php foreach($tweets as $tweet): ?>
-			<li style="background-image:url(<?php echo hl_e($tweet->avatar); ?>)">
+			<li style="background-image:url(<?php echo hl_twitter_get_avatar($tweet->avatar); ?>)">
 				<p>
 					<?php echo hl_twitter_show_tweet($tweet->tweet); ?>
 					<span class="meta">

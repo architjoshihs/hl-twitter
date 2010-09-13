@@ -74,6 +74,10 @@ Auto-tweeting, having HL Twitter tweet a new message whenever you publish a post
 * Added auto-tweet ability
 * Added Feedback panel
 
+= 2010.9.13 =
+
+* Avatars are now resized and cached locally (thanks to Scotts for the heads up)
+
 == Upgrade Notice ==
 
 = 2010.9.3 =

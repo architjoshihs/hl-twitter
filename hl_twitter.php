@@ -4,10 +4,10 @@ Plugin Name: HL Twitter
 Plugin URI: http://hybridlogic.co.uk/code/wordpress-plugins/hl-twitter/
 Description: Pulls in all tweets and optionally sends new tweets
 Author: Luke Lanchester
-Version: 2010.9.12
+Version: 2010.9.13
 Author URI: http://www.lukelanchester.com/
 Created: 2010-07-25
-Modified: 2010-09-12
+Modified: 2010-09-13
 */
 @session_start(); // needed for oauth
 
@@ -15,6 +15,7 @@ define('HL_TWITTER_LOADED', true);
 define('HL_TWITTER_DB_PREFIX', $table_prefix.'hl_twitter_');
 define('HL_TWITTER_DIR', plugin_dir_path(__FILE__)); # inc /
 define('HL_TWITTER_URL', plugin_dir_url(__FILE__)); # inc /
+define('HL_TWITTER_AVATAR_CACHE_TTL', 3600); # How long should avatars be cached for, in seconds
 define('HL_TWITTER_API_MAX_TWEET_LIMIT', 3200); # Twitter only keeps n tweets :(
 define('HL_TWITTER_API_TWEETS_PER_PAGE', 200); # max num tweets per request
 define('HL_TWITTER_CRON_KEY', ''); # ?hl_twitter_cron=KEY, deprecated, leave blank to disable
