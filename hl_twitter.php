@@ -4,7 +4,7 @@ Plugin Name: HL Twitter
 Plugin URI: http://hybridlogic.co.uk/code/wordpress-plugins/hl-twitter/
 Description: Pulls in all tweets and optionally sends new tweets
 Author: Luke Lanchester
-Version: 2010.9.15b
+Version: 2010.9.152
 Author URI: http://www.lukelanchester.com/
 Created: 2010-07-25
 Modified: 2010-09-15
