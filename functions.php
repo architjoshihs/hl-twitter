@@ -97,6 +97,43 @@ function hl_twitter_generate_post_tweet_text($post_id) {
 } // end func: hl_twitter_generate_post_tweet_text
 
 
+/*
+	Returns a 48x48 (max) avatar image URL and caches locally
+*/
+function hl_twitter_get_avatar($url) {
+	if($url=='') return false;
+	
+	$hash = md5($url);
+	$ext = substr($url, strrpos($url,'.'));
+	$file = 'avatars/'.$hash.$ext;
+	
+	if(file_exists(HL_TWITTER_DIR.$file) and filemtime(HL_TWITTER_DIR.$file)+HL_TWITTER_AVATAR_CACHE_TTL >= time()) {
+		return HL_TWITTER_URL.$file;
+	}
+	
+	try {
+		$original_file = HL_TWITTER_DIR.'avatars/'.$hash.$ext;
+		
+		$resp = wp_remote_get($url);
+		if($resp['response']['code']!=200) return $url;
+		
+		$result = wp_mkdir_p(HL_TWITTER_DIR.'avatars/');
+		if(!$result) return $url;
+		
+		$result = @file_put_contents($original_file, $resp['body']);
+		if(!$result) return $url;
+		
+		$result = image_resize($original_file, 48, 48, false, '48', 90);
+		if($result) return HL_TWITTER_URL.$file;
+		
+		return $url;
+		
+	} catch(Exception $e) {
+		return $url;
+	}
+	
+} // end func: hl_twitter_get_avatar
+
 
 /*
 	Returns a tweet with all links, hashtags and usernames converted to links

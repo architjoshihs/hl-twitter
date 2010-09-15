@@ -78,7 +78,14 @@ Auto-tweeting, having HL Twitter tweet a new message whenever you publish a post
 
 * Avatars are now resized and cached locally (thanks to Scotts for the heads up)
 
+= 2010.9.15 =
+
+* Emergency fix; a regression bug was present in 2010.9.13 that affected all plugin users.
+
 == Upgrade Notice ==
 
 = 2010.9.3 =
 First public release
+
+= 2010.9.15 =
+Fixes a bug caused by 2010.9.13 update. Very sorry to anyone who downloaded the plugin and was affected.
