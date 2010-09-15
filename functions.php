@@ -80,21 +80,57 @@ function hl_twitter_generate_post_tweet_text($post_id) {
 	
 	$prior_auto_tweet = get_post_meta($post_id, HL_TWITTER_AUTO_TWEET_POSTMETA, true);
 	if($prior_auto_tweet!='') return $prior_auto_tweet;
+	$tweet_format = get_option(HL_TWITTER_TWEET_FORMAT, HL_TWITTER_DEFAULT_TWEET_FORMAT);
 	
-	$tweet_format = get_option(HL_TWITTER_TWEET_FORMAT, 'I just posted %title%, read it here: %shortlink%');
+	$post = get_post($post_id);
 	
-	$search = array('%title%', '%shortlink%', '%permalink%');
 	$post_title = get_the_title($post_id);
+	
 	$post_permalink = get_permalink($post_id);
-	$post_shortlink = wp_get_shortlink($post_id);
+	if(function_exists('wp_get_shortlink')) $post_shortlink = wp_get_shortlink($post_id);
 	if($post_shortlink=='') $post_shortlink = $post_permalink;
-	$replace = array($post_title, $post_shortlink, $post_permalink);
+	
+	$post_date = mysql2date(get_option('date_format'), $post->post_date);
+	$post_time = mysql2date(get_option('time_format'), $post->post_date);
+	
+	if(strpos($tweet_format, '%categories%')!==false) {
+		$categories = get_the_category($post_id);
+		if(count($categories)>0) {
+			$post_categories = array();
+			foreach($categories as $cat) {
+				$post_categories[] = $cat->name;
+			}
+			$post_categories = implode(', ', $post_categories);
+		} else {
+			$post_categories = '';
+		}
+	}
+	
+	if(strpos($tweet_format, '%tags%')!==false) {
+		$tags = get_the_terms($post_id, 'post_tag');
+		if(count($tags)>0) {
+			$post_tags = array();
+			foreach($tags as $tag) {
+				$post_tags[] = $tag->name;
+			}
+			$post_tags = implode(', ', $post_tags);
+		} else {
+			$post_tags = '';
+		}
+	}
+	
+	$search = array('%title%', '%shortlink%', '%permalink%', '%date%', '%time%', '%categories%', '%tags%');
+	$replace = array($post_title, $post_shortlink, $post_permalink, $post_date, $post_time, $post_categories, $post_tags);
 	
 	$tweet = str_replace($search, $replace, $tweet_format);
-	
 	return $tweet;
-	
 } // end func: hl_twitter_generate_post_tweet_text
+
+
+
+
+
+
 
 
 /*

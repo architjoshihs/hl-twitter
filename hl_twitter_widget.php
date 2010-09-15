@@ -10,6 +10,9 @@
 		$after_widget
 		$before_title
 		$after_title
+		$widget_title
+		$show_avatars
+		$show_powered_by
 		$num_tweets: how many tweets to show
 		$tweets: array of $tweet
 		$tweet: object representing a tweet
@@ -52,12 +55,14 @@
 }
 
 .hl_recent_tweets li {
+	<?php if($show_avatars): ?>
 	background-repeat: no-repeat;
 	background-position: 0 3px;
 	min-height: 48px;
 	height: auto !important;
 	height: 48px;
 	padding-left: 54px;
+	<?php endif; ?>
 	margin-bottom: 6px;
 }
 .hl_recent_tweets p {
@@ -67,18 +72,26 @@
 	display: block;
 	font-size: 10px;
 }
+.hl_recent_tweets_none {
+	margin-bottom: 0;
+}
+.hl_recent_tweets_meta {
+	font-size: 10px;
+	color: #999;
+	font-style: italic;
+}
 </style>
 
 <?php echo $before_widget; ?>
 
 <?php echo $before_title; ?>
-	<?php echo ( ($single_user)?$user->name."'s ":'') . 'Recent Tweets'; ?>
+	<?php echo $widget_title; ?>
 <?php echo $after_title; ?>
 
 <?php if($num_tweets>0): ?>
 	<ul class="hl_recent_tweets">
 		<?php foreach($tweets as $tweet): ?>
-			<li style="background-image:url(<?php echo hl_twitter_get_avatar($tweet->avatar); ?>)">
+			<li <?php if($show_avatars): ?>style="background-image:url(<?php echo hl_twitter_get_avatar($tweet->avatar); ?>)"<?php endif; ?>>
 				<p>
 					<?php echo hl_twitter_show_tweet($tweet->tweet); ?>
 					<span class="meta">
@@ -91,7 +104,11 @@
 		<?php endforeach; ?>
 	</ul>
 <?php else: ?>
-	<p>There are no recent tweets.</p>
+	<p class="hl_recent_tweets_none">There are no recent tweets.</p>
+<?php endif; ?>
+
+<?php if($show_powered_by): ?>
+	<p class="hl_recent_tweets_meta">Powered by <a href="http://hybridlogic.co.uk/hl-twitter">HL Twitter</a></p>
 <?php endif; ?>
 
 <?php echo $after_widget; ?>

@@ -9,7 +9,6 @@ class hl_twitter_widget extends WP_Widget {
 		
 		$num_tweets = intval($instance['num_tweets']);
 		if($num_tweets<=0) $num_tweets = 5;
-		
 		$user_id = intval($instance['user_id']);
 		if($user_id>0) {
 			$single_user = true;
@@ -44,6 +43,10 @@ class hl_twitter_widget extends WP_Widget {
 		
 		$tweets = $wpdb->get_results($sql);
 		$num_tweets = $wpdb->num_rows;
+		$widget_title = $instance['widget_title'];
+		if($widget_title=='') $widget_title = (($single_user)?$user->name."'s ":'') . 'Recent Tweets';
+		$show_avatars = (bool) $instance['show_avatars'];
+		$show_powered_by = (bool) $instance['show_powered_by'];
 		
 		$current_template_directory = get_template_directory();
 		if(file_exists($current_template_directory.'/hl_twitter_widget.php')) {
@@ -62,8 +65,11 @@ class hl_twitter_widget extends WP_Widget {
 	
 	function update($new_instance, $old_instance) {				
 		$instance = $old_instance;
+		$instance['widget_title'] = stripslashes($new_instance['widget_title']);
 		$instance['num_tweets'] = intval($new_instance['num_tweets']);
 		$instance['user_id'] = intval($new_instance['user_id']);
+		$instance['show_avatars'] = ($new_instance['show_avatars']=='on')?1:0;
+		$instance['show_powered_by'] = ($new_instance['show_powered_by']=='on')?1:0;
 		return $instance;
 	} // end func: update
 	
@@ -72,10 +78,20 @@ class hl_twitter_widget extends WP_Widget {
 		global $wpdb;
 		$users = $wpdb->get_results('SELECT twitter_user_id, screen_name FROM '.HL_TWITTER_DB_PREFIX.'users ORDER BY screen_name ASC');
 		$poss_num_tweets = range(1,10);
+		$poss_yesno = array(1=>'Yes', 0=>'No');
 		
+		$widget_title = esc_attr($instance['widget_title']);
 		$user_id = intval(esc_attr($instance['user_id']));
 		$num_tweets = intval(esc_attr($instance['num_tweets']));
+		$show_avatars = (bool) esc_attr($instance['show_avatars']);
+		$show_powered_by = (bool) esc_attr($instance['show_powered_by']);
+		
 		?>
+		
+		<p>
+			<label for="<?php echo $this->get_field_id('widget_title'); ?>"><?php _e('Title'); ?></label><br />
+			<input type="text" id="<?php echo $this->get_field_id('widget_title'); ?>" name="<?php echo $this->get_field_name('widget_title'); ?>" value="<?php echo $widget_title; ?>" />
+		</p>
 		
 		<p>
 			<label for="<?php echo $this->get_field_id('user_id'); ?>"><?php _e('User'); ?></label><br />
@@ -94,6 +110,16 @@ class hl_twitter_widget extends WP_Widget {
 					<option value="<?php echo $num; ?>" <?php if($num_tweets==$num) echo 'selected="selected"'; ?>><?php echo $num; ?></option>
 				<?php endforeach; ?>
 			</select>
+		</p>
+		
+		<p>
+			<label for="<?php echo $this->get_field_id('show_avatars'); ?>"><?php _e('Show avatars?'); ?></label><br />
+			<input type="checkbox" <?php if($show_avatars) echo 'checked="checked"'; ?> id="<?php echo $this->get_field_id('show_avatars'); ?>" name="<?php echo $this->get_field_name('show_avatars'); ?>" />
+		</p>
+		
+		<p>
+			<label for="<?php echo $this->get_field_id('show_powered_by'); ?>"><?php _e('Show powered by?'); ?></label><br />
+			<input type="checkbox" <?php if($show_powered_by) echo 'checked="checked"'; ?> id="<?php echo $this->get_field_id('show_powered_by'); ?>" name="<?php echo $this->get_field_name('show_powered_by'); ?>" />
 		</p>
 		
 		<?php 

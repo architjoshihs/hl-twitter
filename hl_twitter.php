@@ -4,7 +4,7 @@ Plugin Name: HL Twitter
 Plugin URI: http://hybridlogic.co.uk/code/wordpress-plugins/hl-twitter/
 Description: Pulls in all tweets and optionally sends new tweets
 Author: Luke Lanchester
-Version: 2010.9.15
+Version: 2010.9.15b
 Author URI: http://www.lukelanchester.com/
 Created: 2010-07-25
 Modified: 2010-09-15
@@ -24,6 +24,7 @@ define('HL_TWITTER_UPDATE_FREQUENCY', 'hl_twitter_update_frequency'); # Interval
 define('HL_TWITTER_SCHEDULED_EVENT_ACTION', 'hl_twitter_cron_handler'); # For WordPress Scheduled Event handler
 define('HL_TWITTER_AUTO_TWEET_SETTINGS', 'hl_twitter_auto_tweet');
 define('HL_TWITTER_AUTO_TWEET_POSTMETA', 'hl_twitter_has_auto_tweeted');
+define('HL_TWITTER_DEFAULT_TWEET_FORMAT', 'I just posted %title%, read it here: %shortlink%');
 
 define('HL_TWITTER_OAUTH_CONSUMER_KEY', 'qeqJ3iEpoY9xVUSL2ZSIw'); # HL Twittter Application
 define('HL_TWITTER_OAUTH_CONSUMER_SECRET', 'tL9zLT0y8zbMFUUKOXRiXKc3DYtLckNgFOpvYDm0rc'); # Not critical via OAuth

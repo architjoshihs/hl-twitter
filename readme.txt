@@ -2,7 +2,7 @@
 Contributors: Dachande663
 Donate link: http://hybridlogic.co.uk/code/wordpress-plugins/hl-twitter/
 Tags: twitter, tweet, post, auto tweet, social, social media, backup, hybridlogic
-Requires at least: 3.0.0
+Requires at least: 2.9.2
 Tested up to: 3.0.1
 Stable tag: trunk
 
@@ -36,7 +36,7 @@ Twitter currently limit access to the 3,200 most recent tweets for an account. I
 
 Twitter limits applications to a set number of requests per hour. If you are tracking a lot of people you may hit this limit before HL Twitter has finished importing all new tweets.
 
-= How do I enabled auto-tweeting? =
+= How do I enable auto-tweeting? =
 
 Auto-tweeting, having HL Twitter tweet a new message whenever you publish a post or page, is disabled by default. To enable it go to Twitter -> Settings in your WordPress admin. You can also change the default text that is shown in the tweet. When publishing a new post or page, you will not be able to choose whether or not to tweet for this post.
 
@@ -82,10 +82,16 @@ Auto-tweeting, having HL Twitter tweet a new message whenever you publish a post
 
 * Emergency fix; a regression bug was present in 2010.9.13 that affected all plugin users.
 
+= 2010.9.15b =
+
+* Updated the auto-tweet feature to support more fields and improve performance
+* Widget now has more options including setting a title and hiding avatars
+* Added support for WordPress 2.9.2
+
 == Upgrade Notice ==
 
 = 2010.9.3 =
 First public release
 
 = 2010.9.15 =
-Fixes a bug caused by 2010.9.13 update. Very sorry to anyone who downloaded the plugin and was affected.
+Fixes a bug caused by 2010.9.13 update. Very sorry to anyone who downloaded the plugin and was affected in this interim period.

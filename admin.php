@@ -35,7 +35,8 @@ function hl_twitter_feedback() {
 */
 function hl_twitter_publish_post($post_id) {
 	
-	if($_POST['hl_twitter_auto_tweet']!='on') return $post_id;
+	$auto_tweet_on = (bool) get_option(HL_TWITTER_AUTO_TWEET_SETTINGS, false);
+	if(!$auto_tweet_on) return $post_id;
 	
 	$post_id = intval($post_id);
 	$revision_id = wp_is_post_revision($post_id);
@@ -45,7 +46,7 @@ function hl_twitter_publish_post($post_id) {
 	if($prior_auto_tweet!='') return $post_id;
 	
 	$tweet = stripslashes($_POST['hl_twitter_box_tweet']);
-	if($tweet=='') $tweet = hl_twitter_generate_post_tweet_text($post->ID);
+	if($tweet=='') $tweet = hl_twitter_generate_post_tweet_text($post_id);
 	if(strlen($tweet)>140) $tweet = substr($tweet,0,137).'...';
 	
 	$response = hl_twitter_tweet($tweet);
@@ -1035,7 +1036,8 @@ function hl_twitter_settings() {
 	);
 	
 	$object = new stdClass;
-	$object->tweet_format = get_option(HL_TWITTER_TWEET_FORMAT, 'I just posted %title%, read it here: %shortlink%');
+	$object->tweet_format = get_option(HL_TWITTER_TWEET_FORMAT, HL_TWITTER_DEFAULT_TWEET_FORMAT);
+	if(!function_exists('wp_get_shortlink')) $object->tweet_format = str_replace('%shortlink%', '%permalink%', $object->tweet_format);
 	$object->auto_tweet = (bool) get_option(HL_TWITTER_AUTO_TWEET_SETTINGS, false);
 	$object->update_frequency = get_option(HL_TWITTER_UPDATE_FREQUENCY, 'hl_1hr');
 	
@@ -1076,7 +1078,13 @@ function hl_twitter_settings() {
 				<ul>
 					<li><code>%title%</code> The post title e.g. My Blog Post</li>
 					<li><code>%permalink%</code> The link for this post e.g. mysite.com/2010/08/my-blog-post</li>
-					<li><code>%shortlink%</code> The shortlink for this post e.g. mysite.com/?p=123 or bit.ly/abc123</li>
+					<?php if(function_exists('wp_get_shortlink')): ?>
+						<li><code>%shortlink%</code> The shortlink for this post e.g. mysite.com/?p=123 or bit.ly/abc123</li>
+					<?php endif; ?>
+					<li><code>%date%</code> The date of publication as set in your Settings e.g. <?php echo date_i18n(get_option('date_format')); ?></li>
+					<li><code>%time%</code> The time of publication as set in your Settings e.g. <?php echo date_i18n(get_option('time_format')); ?></li>
+					<li><code>%categories%</code> A comma separated list of categories e.g. Movies, Games, Pictures</li>
+					<li><code>%tags%</code> A comma separated list of tags e.g. red, white, blue</li>
 				</ul>
 			</tr>
 			<tr>
