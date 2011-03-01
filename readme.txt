@@ -28,6 +28,10 @@ To modify the widget theme:
 
 == Frequently Asked Questions ==
 
+= The link to Twitter button is stuck on loading / never loads? =
+
+You must make sure that your server supports cURL, and more explicitly multi_curl, in PHP. Google will provide more information.
+
 = Why can I only import 3,200 tweets? =
 
 Twitter currently limit access to the 3,200 most recent tweets for an account. If they increase this limit, HL Twitter will also increase.
@@ -46,6 +50,10 @@ Auto-tweeting, having HL Twitter tweet a new message whenever you publish a post
 2. Default widget styling with the WordPress TwentyTen theme.
 
 == Changelog ==
+
+= 2011.3.1 =
+* Auto-tweet now checks to make sure tweet isn't empty
+* Added multi_curl support info
 
 = 2010.7.3 =
 * Initial development

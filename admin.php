@@ -47,6 +47,7 @@ function hl_twitter_publish_post($post_id) {
 	
 	$tweet = stripslashes($_POST['hl_twitter_box_tweet']);
 	if($tweet=='') $tweet = hl_twitter_generate_post_tweet_text($post_id);
+	if(!$tweet) return $post_id;
 	if(strlen($tweet)>140) $tweet = substr($tweet,0,137).'...';
 	
 	$response = hl_twitter_tweet($tweet);
@@ -1185,6 +1186,11 @@ function hl_twitter_admin_authorize_oauth() {
 		}
 		echo '<div class="wrap"><h2>Connect to Twitter</h2><p>An error occurred while trying to connect to Twitter. Please try again later.</p></div>';
 		return;
+	}
+	
+	// Check cURL support
+	if(!function_exists('curl_exec')) {
+		return hl_twitter_error('cURL support was not found on this server. Please make sure cURL is enabled for PHP and try again.');
 	}
 	
 	// They are not connected to Twitter yet + haven't requested a token

@@ -85,6 +85,7 @@ function hl_twitter_generate_post_tweet_text($post_id) {
 	$post = get_post($post_id);
 	
 	$post_title = get_the_title($post_id);
+	if($post_title=='') return false;
 	
 	$post_permalink = get_permalink($post_id);
 	if(function_exists('wp_get_shortlink')) $post_shortlink = wp_get_shortlink($post_id);
