@@ -3,7 +3,7 @@ Contributors: Dachande663
 Donate link: http://hybridlogic.co.uk/code/wordpress-plugins/hl-twitter/
 Tags: twitter, tweet, post, auto tweet, social, social media, backup, hybridlogic
 Requires at least: 2.9.2
-Tested up to: 3.0.1
+Tested up to: 3.1
 Stable tag: trunk
 
 HL Twitter stores tweets from multiple accounts and displays them via a customisable widget as well as supprting auto-tweeting new posts.
