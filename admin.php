@@ -504,7 +504,7 @@ function hl_twitter_admin_delete_tweet($id) {
 	<div class="wrap">
 		<h2>Delete Tweet</h2>
 		<p>Are you sure you wish to remove this tweet from the database? Please note, if this is the most recent tweet from this user it may be re-imported later on.</p>
-		<form method="post" action="admin.php?page=hl_twitter&amp;action=delete&amp;id=<?php echo $user->id; ?>">
+		<form method="post" action="admin.php?page=hl_twitter&amp;action=delete&amp;id=<?php echo $object->id; ?>">
 			<p>
 				<a href="admin.php?page=hl_twitter" class="button-secondary">Cancel</a>
 				<input type="submit" name="submit" value="Delete" class="button-primary" />

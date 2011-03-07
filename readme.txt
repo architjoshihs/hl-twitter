@@ -51,6 +51,9 @@ Auto-tweeting, having HL Twitter tweet a new message whenever you publish a post
 
 == Changelog ==
 
+= 2011.3.7 =
+* Fixed deleting tweets
+
 = 2011.3.1 =
 * Auto-tweet now checks to make sure tweet isn't empty
 * Added multi_curl support info
