@@ -6,11 +6,11 @@ Requires at least: 2.9.2
 Tested up to: 3.1
 Stable tag: trunk
 
-HL Twitter stores tweets from multiple accounts and displays them via a customisable widget as well as supprting auto-tweeting new posts.
+HL Twitter stores tweets from multiple accounts and displays them via a widget and full archive page as well as auto-tweeting new posts.
 
 == Description ==
 
-HL Twitter lets you display your tweets as a widget in your sidebar. But it also does a whole lot more. You can track multiple Twitter accounts and store all of the tweets on your blog indefinitely (currently Twitter only keep your 3,200 most recent tweets) as well as pulling in any tweets that you reply to for future reference. You can then tweet from your Dashboard or have HL Twitter automatically tweet your new posts with a customisable message.
+HL Twitter lets you display your tweets as a widget in your sidebar or even browse your entire Twitter history right on your blog. But it also does a whole lot more. You can track multiple Twitter accounts and store all of the tweets on your blog indefinitely (currently Twitter only keep your 3,200 most recent tweets) as well as pulling in any tweets that you reply to for future reference. You can then tweet from your Dashboard or have HL Twitter automatically tweet your new posts with a customisable message.
 
 == Installation ==
 
@@ -44,12 +44,27 @@ Twitter limits applications to a set number of requests per hour. If you are tra
 
 Auto-tweeting, having HL Twitter tweet a new message whenever you publish a post or page, is disabled by default. To enable it go to Twitter -> Settings in your WordPress admin. You can also change the default text that is shown in the tweet. When publishing a new post or page, you will not be able to choose whether or not to tweet for this post.
 
+= The Tweet Archive page doesn't load =
+
+This is an issue caused by updates to WordPress, going to Settings -> Permalinks and saving should fix it.
+
+= Some of my tweets have the wrong links! =
+
+For example: http://twitter.com/Username/status/123456789 displays as http://twitter.com/Username/status/123456000.
+
+This was an issue caused by certain versions of PHP truncating the IDs when it loaded them from Twitter. This was fixed in Version 2011.3.11, apologies to anyone who was affected by this issue.
+
 == Screenshots ==
 
 1. Example user list showing tweet, follower and friend counts.
 2. Default widget styling with the WordPress TwentyTen theme.
 
 == Changelog ==
+
+= 2011.3.11 =
+* Added a brand new archive page system which lets you browse all the tweets stored by HL Twitter on your blog.
+* General code maintenance
+* FIXED: A critical bug caused by some versions of PHP json_encode where IDs were truncated e.g. 123456789 became 123456000. Very sorry to anyone who was affected by this.
 
 = 2011.3.7 =
 * Fixed deleting tweets

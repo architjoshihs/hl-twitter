@@ -95,7 +95,7 @@
 				<p>
 					<?php echo hl_twitter_show_tweet($tweet->tweet); ?>
 					<span class="meta">
-						<a href="http://twitter.com/<?php echo hl_e($tweet->screen_name); ?>/statuses/<?php echo hl_e($tweet->twitter_tweet_id); ?>">
+						<a href="http://twitter.com/<?php echo hl_e($tweet->screen_name); ?>/status/<?php echo hl_e($tweet->twitter_tweet_id); ?>">
 							<?php echo hl_time_ago($tweet->created); ?> ago
 						</a>
 					</span>
@@ -107,8 +107,13 @@
 	<p class="hl_recent_tweets_none">There are no recent tweets.</p>
 <?php endif; ?>
 
-<?php if($show_powered_by): ?>
-	<p class="hl_recent_tweets_meta">Powered by <a href="http://hybridlogic.co.uk/hl-twitter">HL Twitter</a></p>
+
+<?php if($show_more_link or $show_powered_by): ?>
+<p class="hl_recent_tweets_meta">
+	<?php if($show_more_link): ?><a href="<?php echo hl_twitter_get_archives_root(); ?><?php if($single_user) echo '/'.$user->screen_name; ?>">View more tweets</a><?php endif; ?>
+	<?php if($show_more_link and $show_powered_by): ?>|<?php endif; ?>
+	<?php if($show_powered_by): ?>Powered by <a href="http://hybridlogic.co.uk/hl-twitter">HL Twitter</a><?php endif; ?>
+</p>
 <?php endif; ?>
 
 <?php echo $after_widget; ?>

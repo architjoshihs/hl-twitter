@@ -2,6 +2,59 @@
 
 
 /*
+	Add necessary URL rules
+*/
+function hl_twitter_add_rewrite_rules() {
+	$slug = get_option(HL_TWITTER_ARCHIVES_SLUG_KEY, HL_TWITTER_ARCHIVES_DEFAULT_SLUG);
+	$regex = '(/?([a-zA-Z0-9_]+|[-]{1}))?(/?([0-9]{4}))?(/?([0-9]{1,2}))?(/?([0-9]{1,2}))?/?$';
+	$redirect = 'index.php?is_hl_twitter=true&hl_twitter_username=$matches[2]&hl_twitter_year=$matches[4]&hl_twitter_month=$matches[6]&hl_twitter_day=$matches[8]';
+	add_rewrite_rule($slug.$regex, $redirect, 'top');
+	flush_rewrite_rules(false);
+} // end func: hl_twitter_add_rewrite_rules
+
+
+
+/*
+	Add query var parameters to WordPress whitelist
+*/
+function hl_twitter_add_query_vars($query_vars) {
+	$query_vars[] = 'is_hl_twitter';
+	$query_vars[] = 'hl_twitter_username';
+	$query_vars[] = 'hl_twitter_year';
+	$query_vars[] = 'hl_twitter_month';
+	$query_vars[] = 'hl_twitter_day';
+	return $query_vars;
+} // end func: hl_twitter_add_query_vars
+
+
+
+/*
+	Intercept requests for Archive pages
+*/
+function hl_twitter_rewrite_parse_request() {
+	global $wp;
+	if(array_key_exists('is_hl_twitter', $wp->query_vars) and $wp->query_vars['is_hl_twitter']=='true') {
+		hl_twitter_display_archive_page(
+			$wp->query_vars['hl_twitter_username'],
+			$wp->query_vars['hl_twitter_year'], $wp->query_vars['hl_twitter_month'], $wp->query_vars['hl_twitter_day'],
+			$_GET['page'], $_GET['s']);
+		die();
+	}
+	return;
+}
+
+
+
+/*
+	Return HL Twitter Archives root location
+*/
+function hl_twitter_get_archives_root() {
+	return get_bloginfo('wpurl').'/'.get_option(HL_TWITTER_ARCHIVES_SLUG_KEY, 'hl-twitter');
+} // end func: hl_twitter_get_archives_root
+
+
+
+/*
 	Run cron job
 */
 function hl_twitter_init() {
@@ -34,7 +87,6 @@ function hl_twitter_is_oauth_verified() {
 
 
 
-
 /*
 	Returns a single instance of the Twitter OAuth interface
 */
@@ -48,7 +100,6 @@ function hl_twitter_get_api() {
 	}
 	return $hl_twitter_api;
 } // end func: hl_twitter_get_api
-
 
 
 
@@ -129,11 +180,6 @@ function hl_twitter_generate_post_tweet_text($post_id) {
 
 
 
-
-
-
-
-
 /*
 	Returns a 48x48 (max) avatar image URL and caches locally
 */
@@ -172,17 +218,17 @@ function hl_twitter_get_avatar($url) {
 } // end func: hl_twitter_get_avatar
 
 
+
 /*
 	Returns a tweet with all links, hashtags and usernames converted to links
 */
 function hl_twitter_show_tweet($tweet) {
 	$tweet = preg_replace("#(^|[\n ])([\w]+?://[\w]+[^ \"\n\r\t< ]*)#", "\\1<a href=\"\\2\">\\2</a>", $tweet);
 	$tweet = preg_replace("#(^|[\n ])((www|ftp)\.[^ \"\t\n\r< ]*)#", "\\1<a href=\"http://\\2\">\\2</a>", $tweet);
-	$tweet = preg_replace("/@(\w+)/", "<a href=\"http://www.twitter.com/\\1\">@\\1</a>", $tweet);
+	$tweet = preg_replace("/@(\w+)/", "<a href=\"http://twitter.com/\\1\">@\\1</a>", $tweet);
 	$tweet = preg_replace("/#(\w+)/", "<a href=\"http://search.twitter.com/search?q=\\1\">#\\1</a>", $tweet);
 	return $tweet;
 } // end func: hl_twitter_show_tweet
-
 
 
 
@@ -192,6 +238,7 @@ function hl_twitter_show_tweet($tweet) {
 function hl_twitter_cron_handler() {
 	hl_twitter_import();
 } // end func: hl_twitter_cron_handler
+
 
 
 /*
@@ -232,11 +279,73 @@ function hl_twitter_cron_schedules($schedules) {
 
 
 /*
+	Return a query object for tweets
+*/
+function hl_twitter_build_tweets_query_object($params) {
+	global $wpdb;
+	
+	# SELECT, FROM, JOIN
+	$query = new stdClass;
+	$query->select = 'SELECT t.twitter_tweet_id, t.tweet, t.lat, t.lon, t.created, t.reply_tweet_id, t.reply_screen_name, t.source, u.screen_name, u.name, u.avatar';
+	$query->from = 'FROM '.HL_TWITTER_DB_PREFIX.'tweets AS t';
+	$query->join = 'JOIN '.HL_TWITTER_DB_PREFIX.'users AS u ON t.twitter_user_id = u.twitter_user_id';
+	
+	# WHERE
+	$where_conditions = array();
+	if($params->day>=1 and $params->day<=31) $where_conditions['day'] = 'DAY(t.created)='.absint($params->day);
+	if($params->month>=1 and $params->month<=12) $where_conditions['month'] = 'MONTH(t.created)='.absint($params->month);
+	if($params->year>=2000 and $params->year<=date('Y')) $where_conditions['year'] = 'YEAR(t.created)='.absint($params->year);
+	if($params->twitteruserid>0) $where_conditions['twitteruserid'] = 't.twitter_user_id='.absint($params->twitteruserid);
+	if($params->search!='') $where_conditions['search'] = $wpdb->prepare('MATCH(t.tweet) AGAINST(%s)',$params->search);
+	$query->where = '';
+	if(count($where_conditions)>0) $query->where = 'WHERE ('.implode(') AND (', $where_conditions).')';
+	
+	# ORDER
+	$query->order = 'ORDER BY ';
+	if($params->search) {
+		$params->order_by = 'search';
+		$params->order = 'desc';
+	}
+	if($params->order_by=='search' and !$params->search) $params->order_by = false;
+	switch($params->order_by) {
+		case 'user':
+			$query->order .= 'u.screen_name';
+			break;
+		case 'search':
+			$query->order .= $where_conditions['search'];
+			break;
+		case 'created':
+		default:
+			$query->order .= 't.created';
+	}
+	$query->order .= ($params->order=='desc')?' DESC':' ASC';
+	
+	# LIMIT
+	$limit = ($params->per_page>0 and $params->per_page<200) ? absint($params->per_page) : 20;
+	$page = ($params->page>0) ? absint($params->page) : 1;
+	$offset = ($page-1) * $limit;
+	$query->limit = 'LIMIT '.$offset.', '.$limit;
+	
+	# OUTPUT
+	$query->sql = $query->select.' '.$query->from.' '.$query->join.' '.$query->where.' '.$query->order.' '.$query->limit;
+	return $query;
+	
+} // end func: hl_twitter_build_tweets_query_object
+
+
+
+/*
 	On install...
 */
 function hl_twitter_install() {
-	global $wpdb, $table_prefix;
+	global $wpdb, $wp_rewrite, $table_prefix;
 	
+	$_SESSION['hl_twitter_just_installed'] = true;
+	
+	# Add archive page
+	hl_twitter_add_rewrite_rules();
+	
+	# Add cron job hook
 	wp_schedule_event(time(), 'hl_1hr', HL_TWITTER_SCHEDULED_EVENT_ACTION); # Add cron event handler
 	update_option(HL_TWITTER_UPDATE_FREQUENCY, 'hl_1hr');
 	
@@ -248,6 +357,7 @@ function hl_twitter_install() {
 	 */
 	wp_remote_get('http://hybridlogic.co.uk/hl-plugin-activation.php?plugin=hl_twitter&hash='.md5(get_bloginfo('url')));
 	
+	# Create tables
 	$sql = "
 		CREATE TABLE `".$table_prefix.HL_TWITTER_DB_PREFIX."replies` (
 			`id` int(11) NOT NULL AUTO_INCREMENT,
@@ -287,6 +397,7 @@ function hl_twitter_install() {
 			`source` varchar(40) DEFAULT NULL,
 			PRIMARY KEY (`id`),
 			UNIQUE KEY `twitter_tweet_id` (`twitter_tweet_id`),
+			KEY `twitter_user_id` (`twitter_user_id`),
 			FULLTEXT KEY `tweet` (`tweet`)
 		);
 	";
@@ -309,10 +420,15 @@ function hl_twitter_install() {
 			`created` datetime DEFAULT NULL,
 			`last_updated` datetime DEFAULT NULL,
 			`pull_in_replies` tinyint(1) DEFAULT '0',
-			PRIMARY KEY (`id`)
+			PRIMARY KEY (`id`),
+			KEY `twitter_user_id` (`twitter_user_id`)
 		);
 	";
 	$wpdb->query($sql);
+	
+	# Add some missing indexes (dbDelta is a PITA)
+	$wpdb->query('CREATE INDEX twitter_user_id ON `".$table_prefix.HL_TWITTER_DB_PREFIX."users` (twitter_user_id)');
+	$wpdb->query('CREATE INDEX twitter_user_id ON `".$table_prefix.HL_TWITTER_DB_PREFIX."tweets` (twitter_user_id)');
 	
 } // end func: hl_twitter_install
 
@@ -325,7 +441,6 @@ function hl_twitter_uninstall() {
 	# Leave tables alone, just in case
 	wp_clear_scheduled_hook(HL_TWITTER_SCHEDULED_EVENT_ACTION); # Remove cron
 } // end func: hl_twitter_uninstall
-
 
 
 

@@ -997,16 +997,6 @@ function hl_twitter_import_tweets_for_user() {
 
 
 
-
-
-
-
-
-
-
-
-
-
 /*
 	Settings page
 */
@@ -1041,6 +1031,7 @@ function hl_twitter_settings() {
 	if(!function_exists('wp_get_shortlink')) $object->tweet_format = str_replace('%shortlink%', '%permalink%', $object->tweet_format);
 	$object->auto_tweet = (bool) get_option(HL_TWITTER_AUTO_TWEET_SETTINGS, false);
 	$object->update_frequency = get_option(HL_TWITTER_UPDATE_FREQUENCY, 'hl_1hr');
+	$object->archive_slug = get_option(HL_TWITTER_ARCHIVES_SLUG_KEY, HL_TWITTER_ARCHIVES_DEFAULT_SLUG);
 	
 	if($_POST['submit']) {
 		
@@ -1055,6 +1046,13 @@ function hl_twitter_settings() {
 			update_option(HL_TWITTER_UPDATE_FREQUENCY, $object->update_frequency);
 			wp_clear_scheduled_hook(HL_TWITTER_SCHEDULED_EVENT_ACTION); # Remove cron
 			wp_schedule_event(time(), $object->update_frequency, HL_TWITTER_SCHEDULED_EVENT_ACTION); # Add cron event handler
+		}
+		
+		$new_archive_slug = sanitize_title(stripslashes(trim($_POST['object']['archive_slug'])));
+		if($new_archive_slug != $object->archive_slug) {
+			$object->archive_slug = sanitize_title(stripslashes(trim($_POST['object']['archive_slug'])));
+			update_option(HL_TWITTER_ARCHIVES_SLUG_KEY, $object->archive_slug);
+			hl_twitter_add_rewrite_rules();
 		}
 		
 		$msg_updated = 'Your settings have been saved.';
@@ -1095,6 +1093,15 @@ function hl_twitter_settings() {
 					<br /><span class="description">If enabled, posts will be automatically tweeted when they are first published.</span>
 				</td>
 			</tr>
+			
+			<tr>
+				<th scope="row">Archive Pages</th>
+				<td>
+					<?php bloginfo('wpurl'); ?>/<input type="text" name="object[archive_slug]" value="<?php echo hl_e($object->archive_slug); ?>" class="regular-text" />
+					<br /><span class="description">The slug for your HL Twitter archives</span>
+				</td>
+			</tr>
+			
 			<tr>
 				<th scope="row">Frequency</th>
 				<td>
@@ -1106,7 +1113,6 @@ function hl_twitter_settings() {
 					</select>
 				</td>
 			</tr>
-	
 			
 		</table>
 		<div class="submit">
@@ -1116,6 +1122,24 @@ function hl_twitter_settings() {
 </div>
 <?php
 } // end func: hl_twitter_settings
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -47,6 +47,7 @@ class hl_twitter_widget extends WP_Widget {
 		if($widget_title=='') $widget_title = (($single_user)?$user->name."'s ":'') . 'Recent Tweets';
 		$show_avatars = (bool) $instance['show_avatars'];
 		$show_powered_by = (bool) $instance['show_powered_by'];
+		$show_more_link = (bool) $instance['show_more_link'];
 		
 		$current_template_directory = get_template_directory();
 		if(file_exists($current_template_directory.'/hl_twitter_widget.php')) {
@@ -70,6 +71,7 @@ class hl_twitter_widget extends WP_Widget {
 		$instance['user_id'] = intval($new_instance['user_id']);
 		$instance['show_avatars'] = ($new_instance['show_avatars']=='on')?1:0;
 		$instance['show_powered_by'] = ($new_instance['show_powered_by']=='on')?1:0;
+		$instance['show_more_link'] = ($new_instance['show_more_link']=='on')?1:0;
 		return $instance;
 	} // end func: update
 	
@@ -85,6 +87,7 @@ class hl_twitter_widget extends WP_Widget {
 		$num_tweets = intval(esc_attr($instance['num_tweets']));
 		$show_avatars = (bool) esc_attr($instance['show_avatars']);
 		$show_powered_by = (bool) esc_attr($instance['show_powered_by']);
+		$show_more_link = (bool) esc_attr($instance['show_more_link']);
 		
 		?>
 		
@@ -120,6 +123,11 @@ class hl_twitter_widget extends WP_Widget {
 		<p>
 			<label for="<?php echo $this->get_field_id('show_powered_by'); ?>"><?php _e('Show powered by?'); ?></label><br />
 			<input type="checkbox" <?php if($show_powered_by) echo 'checked="checked"'; ?> id="<?php echo $this->get_field_id('show_powered_by'); ?>" name="<?php echo $this->get_field_name('show_powered_by'); ?>" />
+		</p>
+		
+		<p>
+			<label for="<?php echo $this->get_field_id('show_more_link'); ?>"><?php _e('Show more tweets link?'); ?></label><br />
+			<input type="checkbox" <?php if($show_more_link) echo 'checked="checked"'; ?> id="<?php echo $this->get_field_id('show_more_link'); ?>" name="<?php echo $this->get_field_name('show_more_link'); ?>" />
 		</p>
 		
 		<?php 
