@@ -61,6 +61,9 @@ This was an issue caused by certain versions of PHP truncating the IDs when it l
 
 == Changelog ==
 
+= 2011.3.12 =
+* Fixed more Twitter ID issues, thanks for all the reports.
+
 = 2011.3.11 =
 * Added a brand new archive page system which lets you browse all the tweets stored by HL Twitter on your blog.
 * General code maintenance

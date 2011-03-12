@@ -98,12 +98,12 @@ function hl_twitter_import_tweets($api, $users) {
 			foreach($tweets as $raw_tweet) {
 				
 				if($users[$user_id]->pull_in_replies==1 and $raw_tweet['in_reply_to_status_id']!='') {
-					$tweet_replies[(string) $raw_tweet['in_reply_to_status_id']] = $raw_tweet['in_reply_to_status_id'];
+					$tweet_replies[$raw_tweet['in_reply_to_status_id_str']] = $raw_tweet['in_reply_to_status_id_str'];
 				}
 				
 				$sql_inserts[] = $wpdb->prepare('(%s, %d, %s, %s, %s, %s, %d, %s, %f, %f)',
 					$raw_tweet['id_str'], $raw_tweet['user']['id'], $raw_tweet['text'], date_i18n('Y-m-d H:i:s', strtotime($raw_tweet['created_at'])),
-					strip_tags($raw_tweet['source']), $raw_tweet['in_reply_to_status_id'], $raw_tweet['in_reply_to_user_id'], $raw_tweet['in_reply_to_screen_name'],
+					strip_tags($raw_tweet['source']), $raw_tweet['in_reply_to_status_id_str'], $raw_tweet['in_reply_to_user_id'], $raw_tweet['in_reply_to_screen_name'],
 					$raw_tweet['geo']['coordinates'][0], $raw_tweet['geo']['coordinates'][1]
 				);
 			}
@@ -185,7 +185,7 @@ function hl_twitter_import_tweet_replies($api, $tweet_reply_ids) {
 		$sql_inserts[] = $wpdb->prepare('(%s, %d, %s, %s, %s, %s, %s, %s, %s, %s, %d, %s, %f, %f)',
 			$raw_tweet['id_str'], $raw_tweet['user']['id'], $raw_tweet['user']['name'], $raw_tweet['user']['screen_name'], $raw_tweet['user']['url'], $raw_tweet['user']['profile_image_url'],
 			$raw_tweet['text'], date_i18n('Y-m-d H:i:s', strtotime($raw_tweet['created_at'])),
-			strip_tags($raw_tweet['source']), $raw_tweet['in_reply_to_status_id'], $raw_tweet['in_reply_to_user_id'], $raw_tweet['in_reply_to_screen_name'],
+			strip_tags($raw_tweet['source']), $raw_tweet['in_reply_to_status_id_str'], $raw_tweet['in_reply_to_user_id'], $raw_tweet['in_reply_to_screen_name'],
 			$raw_tweet['geo']['coordinates'][0], $raw_tweet['geo']['coordinates'][1]
 		);
 	}
