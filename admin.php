@@ -914,6 +914,7 @@ function hl_twitter_admin_import_user_tweets($id) {
 add_action('wp_ajax_hl_twitter_import_tweets_for_user', 'hl_twitter_import_tweets_for_user');
 function hl_twitter_import_tweets_for_user() {
 	global $wpdb;
+	@ini_set('memory_limit', '512M');
 	
 	# Get our User and API objects
 	$id = intval($_POST['id']);
@@ -957,8 +958,8 @@ function hl_twitter_import_tweets_for_user() {
 					if(is_array($response->response) and count($response->response)>0) {
 						foreach($response->response as $raw_tweet) {
 							$sql_tweets[] = $wpdb->prepare('(%s, %d, %s, %s, %s, %s, %d, %s, %f, %f)',
-								$raw_tweet['id'], $raw_tweet['user']['id'], $raw_tweet['text'], date_i18n('Y-m-d H:i:s', strtotime($raw_tweet['created_at'])),
-								strip_tags($raw_tweet['source']), $raw_tweet['in_reply_to_status_id'], $raw_tweet['in_reply_to_user_id'], $raw_tweet['in_reply_to_screen_name'],
+								$raw_tweet['id_str'], $raw_tweet['user']['id'], $raw_tweet['text'], date_i18n('Y-m-d H:i:s', strtotime($raw_tweet['created_at'])),
+								strip_tags($raw_tweet['source']), $raw_tweet['in_reply_to_status_id_str'], $raw_tweet['in_reply_to_user_id'], $raw_tweet['in_reply_to_screen_name'],
 								$raw_tweet['geo']['coordinates'][0], $raw_tweet['geo']['coordinates'][1]
 							);
 						}
