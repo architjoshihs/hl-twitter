@@ -3,59 +3,12 @@
 class hl_twitter_widget extends WP_Widget {
 	
 	
-	function widget($args, $instance) {		
-		global $wpdb;
-		extract($args);
-		
-		$num_tweets = intval($instance['num_tweets']);
-		if($num_tweets<=0) $num_tweets = 5;
-		$user_id = intval($instance['user_id']);
-		if($user_id>0) {
-			$single_user = true;
-			$user = $wpdb->get_row($wpdb->prepare('
-				SELECT twitter_user_id, screen_name, name, num_friends, num_followers, num_tweets, registered, url, description, location, avatar
-				FROM '.HL_TWITTER_DB_PREFIX.'users 
-				WHERE twitter_user_id=%d 
-				LIMIT 1
-			', $user_id));
-			$sql = $wpdb->prepare('
-				SELECT
-					t.twitter_tweet_id, t.tweet, t.lat, t.lon, t.created, t.reply_tweet_id, t.reply_screen_name, t.source,
-					u.screen_name, u.name, u.avatar
-				FROM '.HL_TWITTER_DB_PREFIX.'tweets AS t
-				JOIN '.HL_TWITTER_DB_PREFIX.'users AS u ON t.twitter_user_id = u.twitter_user_id
-				WHERE t.twitter_user_id=%d
-				ORDER BY t.created DESC
-				LIMIT 0, %d
-			', $user_id, $num_tweets);
-		} else {
-			$single_user = false;
-			$sql = $wpdb->prepare('
-				SELECT
-					t.twitter_tweet_id, t.tweet, t.lat, t.lon, t.created, t.reply_tweet_id, t.reply_screen_name, t.source,
-					u.screen_name, u.name, u.avatar
-				FROM '.HL_TWITTER_DB_PREFIX.'tweets AS t
-				JOIN '.HL_TWITTER_DB_PREFIX.'users AS u ON t.twitter_user_id = u.twitter_user_id
-				ORDER BY t.created DESC
-				LIMIT 0, %d
-			', $num_tweets);
-		}
-		
-		$tweets = $wpdb->get_results($sql);
-		$num_tweets = $wpdb->num_rows;
-		$widget_title = $instance['widget_title'];
-		if($widget_title=='') $widget_title = (($single_user)?$user->name."'s ":'') . 'Recent Tweets';
-		$show_avatars = (bool) $instance['show_avatars'];
-		$show_powered_by = (bool) $instance['show_powered_by'];
-		$show_more_link = (bool) $instance['show_more_link'];
-		
-		$current_template_directory = get_template_directory();
-		if(file_exists($current_template_directory.'/hl_twitter_widget.php')) {
-			include $current_template_directory.'/hl_twitter_widget.php';
-		} else {
-			include HL_TWITTER_DIR.'/hl_twitter_widget.php';
-		}
-		
+	function widget($args, $instance) {
+		hl_twitter_display_widget(
+			$instance['num_tweets'], $instance['user_id'], $instance['widget_title'],
+			$instance['show_avatars'], $instance['show_powered_by'], $instance['show_more_link'],
+			$args['before_widget'], $args['after_widget'], $args['before_title'], $args['after_title'], $widget_file='hl_twitter_widget.php'
+		);
 	} // end func: widget
 	
 	

@@ -1,12 +1,12 @@
 === HL Twitter ===
 Contributors: Dachande663
 Donate link: http://hybridlogic.co.uk/code/wordpress-plugins/hl-twitter/
-Tags: twitter, tweet, post, auto tweet, social, social media, backup, hybridlogic
+Tags: twitter, tweet, post, auto tweet, social, social media, backup, hybridlogic, archive, shortcode, widget
 Requires at least: 2.9.2
 Tested up to: 3.1
 Stable tag: trunk
 
-HL Twitter stores tweets from multiple accounts and displays them via a widget and full archive page as well as auto-tweeting new posts.
+HL Twitter stores tweets from multiple accounts and displays them via widget, archives and shortcodes as well as auto-tweeting new posts.
 
 == Description ==
 
@@ -22,11 +22,54 @@ HL Twitter lets you display your tweets as a widget in your sidebar or even brow
 
 To modify the widget theme:
 
-1. Copy the hl_twitter_widget.php file from /wp-content/plugins/hl_twitter to /wp-content/themes/*your-current-theme*/
+1. Copy the hl_twitter_widget.php file from /wp-content/plugins/hl-twitter to /wp-content/themes/*your-current-theme*/
 2. Edit the new hl_twitter_widget.php file in your theme directory
 3. You can now update the plugin as normal and your changes will not be overwritten
 
+
+To modify the archive theme:
+
+1. Copy the hl_twitter_archive.php file from /wp-content/plugins/hl-twitter to /wp-content/themes/*your-current-theme*/
+2. Edit the new hl_twitter_archive.php file in your theme directory
+3. You can now update the plugin as normal and your changes will not be overwritten
+
+To modify the shortcode theme:
+
+1. In your current theme directory (e.g. /wp-content/themes/twentyten/) make a file called functions.php if it does not already exist.
+2. In functions.php create a function called hl_twitter_shortcode()
+3. This function will be passed two variables: $tweets and $num_tweets
+4. Generate the necessary HTML and *return it*, DO NOT ECHO.
+
+
+
+
+
 == Frequently Asked Questions ==
+
+= How do I display a tweet in my post with Shortcodes? =
+
+HL Twitter supports supports displaying tweets within a post or page using Shortcodes. To do so, use the following tag:
+
+[hl-twitter]
+
+By default, this will show the most recent tweet as found by HL Twitter. To change this you can use the following options:
+
+* num: the number of tweets to display (optional, default 1)
+* tweet: the ID of a specific tweet e.g. for http://twitter.com/Username/status/123456 use 123456 (optional)
+* user: the Twitter ID of a specific user, this can be found in the URL on the edit user page in HL Twitter (optional, not needed if using tweet_id)
+* search: will show all tweets that match the specified search term (optional)
+* year: show only tweets made in this year e.g. 2011
+* month: show only tweets made in this month e.g. 3
+* day: show only tweets made on this day e.g. 27
+
+Examples:
+
+* [hl-twitter search="football" num=5] Show the first 5 tweets mentioning football
+* [hl-twitter user=12345 year=2011 month=3] Show a single tweet from this user in March 2011
+
+= How do I change the Widget/Archive Page/Shortcode? =
+
+Please look look at the Installation tab which shows how to override the default styling in HL Twitter without losing your changes on each update.
 
 = The link to Twitter button is stuck on loading / never loads? =
 
@@ -60,6 +103,10 @@ This was an issue caused by certain versions of PHP truncating the IDs when it l
 2. Default widget styling with the WordPress TwentyTen theme.
 
 == Changelog ==
+
+= 2011.3.13 =
+* Added support for using Widgets without dynamic sidebars
+* Added support for shortcodes
 
 = 2011.3.12 =
 * Fixed more Twitter ID issues, thanks for all the reports.

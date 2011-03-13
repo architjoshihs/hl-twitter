@@ -2,6 +2,41 @@
 
 
 /*
+	Default styling for HL Twitter shortcode
+	To change how HL Twitter shortcodes are shown, make a function called hl_twitter_shortcode
+	and place it in your functions.php file in your current theme directory.
+*/
+function hl_twitter_shortcode_default($tweets, $num_tweets) {
+	
+	$output = '<div class="hl_twitter_shortcode"><h3>'. ( ($num_tweets==1) ? 'Tweet': 'Tweets' ) .'</h3>';
+	
+	if($num_tweets==0) {
+		return $output .= '<p class="hl_twitter_shortcode_empty">No tweets were found.</p></div>';
+	}
+	
+	$output .= '<ul>';
+	
+	foreach($tweets as $tweet) {
+		$tweet->timestamp = strtotime($tweet->created);
+		$output .= '<li>
+			<p class="hl_twitter_shortcode_tweet">'.hl_twitter_show_tweet($tweet->tweet).'</p>
+			<p class="hl_twitter_shortcode_meta">
+				Tweeted on 
+				<a href="http://twitter.com/'.$tweet->screen_name.'/status/'.$tweet->twitter_tweet_id.'" title="'.date_i18n('g:ia', $tweet->timestamp).'">'.date_i18n('F j, Y', $tweet->timestamp).'</a>
+				by <a href="http://twitter.com/'.$tweet->screen_name.'" title="View Twitter profile">'.$tweet->screen_name.'</a>';
+		if($tweet->reply_screen_name!='') {
+			$output .= ' in reply to <a href="http://twitter.com/'.$tweet->reply_screen_name.'/status/'.$tweet->reply_tweet_id.'">'.$tweet->reply_screen_name.'</a>';
+		}
+		$output .= '</p></li>';
+	}
+	
+	return $output.'</ul></div>';
+	
+} // end func: hl_twitter_shortcode_default
+
+
+
+/*
 	Add necessary URL rules
 */
 function hl_twitter_add_rewrite_rules() {
@@ -233,6 +268,99 @@ function hl_twitter_show_tweet($tweet) {
 
 
 /*
+	Display widget (extracted from widget.php:widget() for use outside dynamic sidebars)
+*/
+function hl_twitter_display_widget(
+	$num_tweets=5, $twitter_user_id=false, $widget_title='Tweets',
+	$show_avatars=true, $show_powered_by=true, $show_more_link=true,
+	$before_widget=false, $after_widget=false, $before_title=false, $after_title=false, $widget_file='hl_twitter_widget.php'
+) {
+	global $wpdb;
+	
+	$num_tweets = intval($num_tweets);
+	if($num_tweets<=0 or $num_tweets>200) $num_tweets = 5;
+	$single_user = false;
+	$twitter_user_id = intval($twitter_user_id);
+	if($twitter_user_id>0) {
+		$user = $wpdb->get_row($wpdb->prepare('
+			SELECT twitter_user_id, screen_name, name, num_friends, num_followers, num_tweets, registered, url, description, location, avatar
+			FROM '.HL_TWITTER_DB_PREFIX.'users 
+			WHERE twitter_user_id=%d 
+			LIMIT 1
+		', $twitter_user_id));
+		$single_user = ($wpdb->num_rows==1) ? true : false;
+	}
+	
+	$query_args = array(
+		'per_page' => $num_tweets,
+		'page' => 1,
+		'order_by' => 'created',
+		'order' => 'desc'
+	);
+	if($single_user) $query_args['twitteruserid'] = $twitter_user_id;
+	$query = hl_twitter_build_tweets_query_object($query_args);
+	
+	$tweets = $wpdb->get_results($query->sql);
+	$num_tweets = $wpdb->num_rows;
+	
+	if($widget_title=='') $widget_title = (($single_user)?$user->name."'s ":'') . 'Recent Tweets';
+	$show_avatars = (bool) $show_avatars;
+	$show_powered_by = (bool) $show_powered_by;
+	$show_more_link = (bool) $show_more_link;
+	$current_template_directory = get_template_directory();
+	if(file_exists($current_template_directory.'/'.$widget_file)) {
+		include $current_template_directory.'/'.$widget_file;
+	} else {
+		include HL_TWITTER_DIR.'/'.$widget_file;
+	}
+	
+} // end func: hl_twitter_display_widget
+
+
+
+/*
+	Display tweets in a post/page
+*/
+function hl_twitter_display_shortcode($atts) {
+	global $wpdb;
+	
+	$sc = shortcode_atts(array(
+		'num' => '1',
+		'tweet' => false,
+		'user' => false,
+		'search' => false,
+		'year' => false,
+		'month' => false,
+		'day' => false
+	), $atts);
+	$sc['num'] = ($sc['num']<=0 or $sc['num']>200) ? 5 : absint($sc['num']);
+	$args = array(
+		'per_page' => $sc['num'],
+		'page' => 1,
+		'order_by' => 'created',
+		'order' => 'desc'
+	);
+	if($sc['tweet']!='') $args['tweetid'] = $sc['tweet'];
+	if($sc['user']!='') $args['twitteruserid'] = $sc['user'];
+	if($sc['search']!='') $args['search'] = $sc['search'];
+	if($sc['year']>=2000 and $sc['year']<=date('Y')) $args['year'] = absint($sc['year']);
+	if($sc['month']>=1 and $sc['month']<=12) $args['month'] = absint($sc['month']);
+	if($sc['day']>=1 and $sc['day']<=31) $args['day'] = absint($sc['day']);
+	
+	$query = hl_twitter_build_tweets_query_object($args);
+	$tweets = $wpdb->get_results($query->sql);
+	$num_tweets = (int) $wpdb->num_rows;
+	
+	if(function_exists('hl_twitter_shortcode')) {
+		return hl_twitter_shortcode($tweets, $num_tweets);
+	}
+	return hl_twitter_shortcode_default($tweets, $num_tweets);
+	
+} // end func: hl_twitter_display_shortcode
+
+
+
+/*
 	Called by the internal WordPress Event Scheduler
 */
 function hl_twitter_cron_handler() {
@@ -284,6 +412,8 @@ function hl_twitter_cron_schedules($schedules) {
 function hl_twitter_build_tweets_query_object($params) {
 	global $wpdb;
 	
+	$params = (object) $params;
+	
 	# SELECT, FROM, JOIN
 	$query = new stdClass;
 	$query->select = 'SELECT t.twitter_tweet_id, t.tweet, t.lat, t.lon, t.created, t.reply_tweet_id, t.reply_screen_name, t.source, u.screen_name, u.name, u.avatar';
@@ -296,6 +426,7 @@ function hl_twitter_build_tweets_query_object($params) {
 	if($params->month>=1 and $params->month<=12) $where_conditions['month'] = 'MONTH(t.created)='.absint($params->month);
 	if($params->year>=2000 and $params->year<=date('Y')) $where_conditions['year'] = 'YEAR(t.created)='.absint($params->year);
 	if($params->twitteruserid>0) $where_conditions['twitteruserid'] = 't.twitter_user_id='.absint($params->twitteruserid);
+	if($params->tweetid!='') $where_conditions['tweetid'] = $wpdb->prepare('t.twitter_tweet_id=%s',$params->tweetid);
 	if($params->search!='') $where_conditions['search'] = $wpdb->prepare('MATCH(t.tweet) AGAINST(%s)',$params->search);
 	$query->where = '';
 	if(count($where_conditions)>0) $query->where = 'WHERE ('.implode(') AND (', $where_conditions).')';
@@ -318,7 +449,7 @@ function hl_twitter_build_tweets_query_object($params) {
 		default:
 			$query->order .= 't.created';
 	}
-	$query->order .= ($params->order=='desc')?' DESC':' ASC';
+	$query->order .= (strtolower($params->order)=='desc')?' DESC':' ASC';
 	
 	# LIMIT
 	$limit = ($params->per_page>0 and $params->per_page<200) ? absint($params->per_page) : 20;

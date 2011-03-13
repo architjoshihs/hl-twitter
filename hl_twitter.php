@@ -4,10 +4,10 @@ Plugin Name: HL Twitter
 Plugin URI: http://hybridlogic.co.uk/code/wordpress-plugins/hl-twitter/
 Description: Pulls in all tweets and optionally sends new tweets
 Author: Luke Lanchester
-Version: 2011.3.12
+Version: 2011.3.13
 Author URI: http://www.lukelanchester.com/
 Created: 2010-07-25
-Modified: 2010-03-12
+Modified: 2010-03-13
 */
 @session_start(); // needed for oauth
 
@@ -53,6 +53,7 @@ add_action('admin_menu', 'hl_twitter_admin_menu'); # Add menu pages
 add_action('publish_post', 'hl_twitter_publish_post'); # When a post is published, auto-tweet
 add_action('wp_dashboard_setup', 'hl_twitter_add_dashboard_widget'); # Add dashboard widget
 add_action('widgets_init', create_function('', 'return register_widget("hl_twitter_widget");')); # Add widget
+add_shortcode('hl-twitter', 'hl_twitter_display_shortcode'); # Add shortcode
 register_activation_hook(__FILE__,'hl_twitter_install');
 register_deactivation_hook(__FILE__,'hl_twitter_uninstall');
 
