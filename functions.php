@@ -416,9 +416,15 @@ function hl_twitter_build_tweets_query_object($params) {
 	
 	# SELECT, FROM, JOIN
 	$query = new stdClass;
-	$query->select = 'SELECT t.twitter_tweet_id, t.tweet, t.lat, t.lon, t.created, t.reply_tweet_id, t.reply_screen_name, t.source, u.screen_name, u.name, u.avatar';
+	$query->select = '
+		SELECT 
+			t.twitter_tweet_id, t.tweet, t.lat, t.lon, t.created, t.reply_tweet_id, t.reply_screen_name, t.source, 
+			u.screen_name, u.name, u.avatar,
+			r.tweet AS reply_tweet, r.created AS reply_created, r.twitter_user_name AS reply_name, r.twitter_user_avatar AS reply_avatar, r.source AS reply_source
+	';
 	$query->from = 'FROM '.HL_TWITTER_DB_PREFIX.'tweets AS t';
 	$query->join = 'JOIN '.HL_TWITTER_DB_PREFIX.'users AS u ON t.twitter_user_id = u.twitter_user_id';
+	$query->join .= ' LEFT JOIN '.HL_TWITTER_DB_PREFIX.'replies AS r ON t.reply_tweet_id = r.twitter_tweet_id';
 	
 	# WHERE
 	$where_conditions = array();

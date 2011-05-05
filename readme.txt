@@ -73,11 +73,11 @@ Please look look at the Installation tab which shows how to override the default
 
 = The link to Twitter button is stuck on loading / never loads? =
 
-You must make sure that your server supports cURL, and more explicitly multi_curl, in PHP. Google will provide more information.
+You must make sure that your server supports cURL, and more explicitly multi_curl, in PHP. Due to the unique nature of each server I can't give more specific advice, so Google is your best bet to get more information.
 
 = Why can I only import 3,200 tweets? =
 
-Twitter currently limit access to the 3,200 most recent tweets for an account. If they increase this limit, HL Twitter will also increase.
+Twitter currently limit access to only the 3,200 most recent tweets for an account. If they increase this limit, HL Twitter will also increase.
 
 = Why aren't all my tweets being pulled in? =
 
@@ -85,11 +85,21 @@ Twitter limits applications to a set number of requests per hour. If you are tra
 
 = How do I enable auto-tweeting? =
 
-Auto-tweeting, having HL Twitter tweet a new message whenever you publish a post or page, is disabled by default. To enable it go to Twitter -> Settings in your WordPress admin. You can also change the default text that is shown in the tweet. When publishing a new post or page, you will not be able to choose whether or not to tweet for this post.
+Auto-tweeting, having HL Twitter tweet a new message whenever you publish a post or page, is disabled by default. To enable it go to HL Twitter -> Settings in your WordPress admin. You can also change the default text that is shown in the tweet. When publishing a new post or page, you will not be able to choose whether or not to tweet for this post.
 
 = The Tweet Archive page doesn't load =
 
-This is an issue caused by updates to WordPress, going to Settings -> Permalinks and saving should fix it.
+WordPress sometimes fails to load the link to the Twitter archive page, most commonly after installing or updating. To fix it, go to HL Twitter -> Settings and change the Archive Pages slug to something different e.g. my-tweets, then press Save. Finally go to Settings -> Permalinks and click Save there. This will force WordPress to check for new links, including HL Twitter.
+
+= New tweets are not automatically imported after the initial import =
+
+HL Twitter uses the internal Events system to periodically check for new tweets, unfortunately this does not work on some blogs. A manual solution is to set up a cron job (or equivalent) on your server. Please note that modifications made to hl_twitter.php may be overwritten by future plugin updates.
+
+* Open /wp-content/plugins/hl-twitter/hl_twitter.php
+* Find the line define('HL_TWITTER_CRON_KEY', '');
+* Change to define('HL_TWITTER_CRON_KEY', 'my-secret-key'); changing my-secret-key to be a phrase only you know
+* Open http://yourwebsite.com/?hl_twitter_cron=my-secret-key in your browser. This will trigger an automatic update. If the page says that tweets were imported, continue, otherwise get in touch with the plugin author via the contact form. (Do not worry if a line says errors were encountered, as long as tweets were saved to the database).
+* Add a cron job to your server to load this URL however often you require.
 
 = Some of my tweets have the wrong links! =
 
@@ -103,6 +113,10 @@ This was an issue caused by certain versions of PHP truncating the IDs when it l
 2. Default widget styling with the WordPress TwentyTen theme.
 
 == Changelog ==
+
+= 2011.5.4 =
+* Changed the menu and widget names to HL Twitter to reduce confusion
+* Tweets archive page now shows the tweets that were replied to (where saved)
 
 = 2011.3.13 =
 * Added support for using Widgets without dynamic sidebars

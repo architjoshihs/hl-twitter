@@ -13,11 +13,11 @@ class hl_twitter_widget extends WP_Widget {
 	
 	
 	function __construct() {
-		parent::__construct(false, $name = 'Recent Tweets', array('description'=>'Shows a list of recent tweets on your website.'));	
+		parent::__construct(false, $name = 'HL Twitter', array('description'=>'Shows a list of recent tweets on your website.'));	
 	} // end func: __construct
 	
 	
-	function update($new_instance, $old_instance) {				
+	function update($new_instance, $old_instance) {
 		$instance = $old_instance;
 		$instance['widget_title'] = stripslashes($new_instance['widget_title']);
 		$instance['num_tweets'] = intval($new_instance['num_tweets']);

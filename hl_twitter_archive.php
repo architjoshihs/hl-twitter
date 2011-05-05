@@ -29,22 +29,37 @@
 		$data->total_tweets
 		$data->num_tweets
 		$data->tweets: array of $tweet
-		$data->tweet: object representing a tweet
+		$tweet: object representing a tweet
 			$tweet->twitter_tweet_id
 			$tweet->tweet
 			$tweet->lat
 			$tweet->lon
 			$tweet->created
-			$tweet->reply_tweet_id
-			$tweet->reply_screen_name
 			$tweet->source
 			$tweet->screen_name
 			$tweet->name
 			$tweet->avatar
+			# The following properties are available for replied to tweets (use $tweet->reply_tweet!='' to test)
+			$tweet->reply_tweet_id
+			$tweet->reply_tweet
+			$tweet->reply_created
+			$tweet->reply_source
+			$tweet->reply_screen_name
+			$tweet->reply_name
+			$tweet->reply_avatar
+			
 */
 $months = array('','January','February','March','April','May','June','July','August','September','October','November','December');
 get_header();
 ?>
+
+<style type="text/css">
+	.hl-twitter-archive-reply {
+		margin:-12px 0 12px;
+		color: #888;
+	}
+</style>
+
 
 <div id="container">
 <div id="content" role="main">
@@ -82,7 +97,7 @@ get_header();
 	<?php endif; ?>
 	
 	<select name="month">
-		<option value="-">All</option>
+		<option value="-">Any time</option>
 		<?php foreach($data->distinct_months as $month): ?>
 			<option value="<?php echo $month->year.'-'.$month->month; ?>" <?php if($data->is_month==$month->month and $data->is_year==$month->year) echo 'selected="selected"'; ?>>
 				<?php echo $months[$month->month].' '.$month->year; ?> (<?php echo number_format($month->num); ?>)
@@ -125,7 +140,20 @@ get_header();
 			<div id="tweet-<?php echo $tweet->twitter_tweet_id; ?>" class="post-<?php echo $tweet->twitter_tweet_id; ?> post type-tweet">
 			
 				<div class="entry-summary">
-					<p><?php echo hl_twitter_show_tweet($tweet->tweet); ?></p>
+					<p><?php echo hl_twitter_show_tweet($tweet->tweet); $tweet->reply_timestamp = strtotime($tweet->reply_created); ?></p>
+						
+					<?php if($tweet->reply_tweet!=''): ?>
+						<blockquote class="hl-twitter-archive-reply">
+							<small>
+								<?php echo hl_twitter_show_tweet($tweet->reply_tweet); ?>
+								<div class="entry-utility">
+									Tweeted on <a href="http://twitter.com/<?php echo $tweet->reply_screen_name; ?>/status/<?php echo $tweet->reply_tweet_id; ?>" title="<?php echo date_i18n('g:ia', $tweet->reply_timestamp); ?>"><?php echo date_i18n('F j, Y', $tweet->reply_timestamp); ?></a>
+									by <a class="url fn n" href="http://twitter.com/<?php echo $tweet->reply_screen_name; ?>" title="View Twitter profile"><?php echo $tweet->reply_screen_name; ?></a>
+								</div>
+							</small>
+						</blockquote>
+					<?php endif; ?>
+					
 				</div><!-- .entry-summary -->
 			
 				<div class="entry-utility">

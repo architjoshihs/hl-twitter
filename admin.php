@@ -4,7 +4,7 @@
   Add admin menu pages
 /*/
 function hl_twitter_admin_menu() {
-	add_menu_page('Twitter', 'Twitter', 'manage_options', 'hl_twitter', 'hl_twitter_admin_view_tweets', HL_TWITTER_URL.'menu_icon.png');
+	add_menu_page('HL Twitter', 'HL Twitter', 'manage_options', 'hl_twitter', 'hl_twitter_admin_view_tweets', HL_TWITTER_URL.'menu_icon.png');
 	add_submenu_page('hl_twitter', 'Tweets', 'Tweets', 'manage_options', 'hl_twitter', 'hl_twitter_admin_view_tweets');
 	add_submenu_page('hl_twitter', 'Users', 'Users', 'manage_options', 'hl_twitter_users', 'hl_twitter_admin_view_users');
 	add_submenu_page('hl_twitter', 'Settings', 'Settings', 'manage_options', 'hl_twitter_settings', 'hl_twitter_settings');
