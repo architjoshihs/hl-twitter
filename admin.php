@@ -1066,6 +1066,19 @@ function hl_twitter_settings() {
 	<?php if($msg_updated): ?><div class="updated"><p><?php echo $msg_updated; ?></p></div><?php endif; ?>
 	<?php if($msg_error): ?><div class="error"><p><?php echo $msg_error; ?></p></div><?php endif; ?>
 	
+	<div style="float:right;width:250px;background:#FFF;border:1px solid #DFDFDF;padding:0 12px 6px;margin-left:24px;">
+		
+		<p>If you've found HL Twitter useful, please consider donating in order to help support it's developer. Thank you.</p>
+		
+		<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+			<input type="hidden" name="cmd" value="_s-xclick">
+			<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----">
+			<input type="image" src="https://www.paypalobjects.com/WEBSCR-640-20110429-1/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+			<img alt="" border="0" src="https://www.paypalobjects.com/WEBSCR-640-20110429-1/en_GB/i/scr/pixel.gif" width="1" height="1">
+		</form>
+		
+	</div>
+	
 	<p>You currently have <strong><?php echo $stats->remaining_hits; ?></strong> out of <strong><?php echo $stats->hourly_limit; ?></strong> requests remaining to the Twitter API. This limit is reset hourly. If you wish to unlink this plugin with your Twitter account, <a href="admin.php?page=hl_twitter_settings&amp;action=unlink">click here</a>.</p>
 	
 	<form method="post" action="admin.php?page=hl_twitter_settings">
