@@ -862,7 +862,12 @@ function hl_twitter_admin_import_user_tweets($id) {
 	$tweets_to_import = ($user->num_tweets>HL_TWITTER_API_MAX_TWEET_LIMIT)?HL_TWITTER_API_MAX_TWEET_LIMIT:$user->num_tweets;
 	
 	$remaining_hits = 0;
-	$response = $api->get('/account/rate_limit_status.json');
+	try {
+		$response = $api->get('/account/rate_limit_status.json');
+	} catch (Exception $e) {
+		echo $e->getMessage();
+		die();
+	}
 	if($response and isset($response->remaining_hits) and $response->remaining_hits>0) $remaining_hits = (int) $response->remaining_hits;
 	
 	$estimated_num_hits = round( ceil($tweets_to_import/200) * 1.33 ); // rough error factor based on how often Twitter fails

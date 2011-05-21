@@ -114,6 +114,9 @@ This was an issue caused by certain versions of PHP truncating the IDs when it l
 
 == Changelog ==
 
+= 2011.5.21 =
+* Updated the Twitter library so HL Twitter should work on more blogs now
+
 = 2011.5.5 =
 * Changed the menu and widget names to HL Twitter to reduce confusion
 * Tweets archive page now shows the tweets that were replied to (where saved)

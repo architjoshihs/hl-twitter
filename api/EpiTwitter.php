@@ -14,11 +14,11 @@ class EpiTwitter extends EpiOAuth
   const EPITWITTER_SIGNATURE_METHOD = 'HMAC-SHA1';
   const EPITWITTER_AUTH_OAUTH = 'oauth';
   const EPITWITTER_AUTH_BASIC = 'basic';
-  protected $requestTokenUrl= 'http://twitter.com/oauth/request_token';
-  protected $accessTokenUrl = 'http://twitter.com/oauth/access_token';
-  protected $authorizeUrl   = 'http://twitter.com/oauth/authorize';
-  protected $authenticateUrl= 'http://twitter.com/oauth/authenticate';
-  protected $apiUrl         = 'http://twitter.com';
+  protected $requestTokenUrl= 'https://api.twitter.com/oauth/request_token';
+  protected $accessTokenUrl = 'https://api.twitter.com/oauth/access_token';
+  protected $authorizeUrl   = 'https://api.twitter.com/oauth/authorize';
+  protected $authenticateUrl= 'https://api.twitter.com/oauth/authenticate';
+  protected $apiUrl         = 'http://api.twitter.com';
   protected $apiVersionedUrl= 'http://api.twitter.com';
   protected $searchUrl      = 'http://search.twitter.com';
   protected $userAgent      = 'EpiTwitter (http://github.com/jmathai/twitter-async/tree/)';
@@ -103,7 +103,7 @@ class EpiTwitter extends EpiOAuth
 
   private function getApiUrl($endpoint)
   {
-    if(preg_match('@^/(trends|search)[./]?(?=(json|daily|current|weekly))@', $endpoint))
+    if(preg_match('@^/search[./]?(?=(json|daily|current|weekly))@', $endpoint))
       return "{$this->searchUrl}{$endpoint}";
     elseif(!empty($this->apiVersion))
       return "{$this->apiVersionedUrl}/{$this->apiVersion}{$endpoint}";
@@ -247,7 +247,6 @@ class EpiTwitterException extends Exception
   public static function raise($response, $debug)
   {
     $message = $response->data;
- 
     switch($response->code)
     {
       case 400:
