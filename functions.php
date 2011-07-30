@@ -486,14 +486,6 @@ function hl_twitter_install() {
 	wp_schedule_event(time(), 'hl_1hr', HL_TWITTER_SCHEDULED_EVENT_ACTION); # Add cron event handler
 	update_option(HL_TWITTER_UPDATE_FREQUENCY, 'hl_1hr');
 	
-	/* Plugin Dial Home
-	 * 
-	 * This is a completely anonymous remote call to the original developers server.
-	 * The only data tracked is an non-reversible hash of the site URL so duplicates
-	 * aren't recorded. It is so installations can be shown on the plugin website.
-	 */
-	wp_remote_get('http://hybridlogic.co.uk/hl-plugin-activation.php?plugin=hl_twitter&hash='.md5(get_bloginfo('url')));
-	
 	# Create tables
 	$sql = "
 		CREATE TABLE `".$table_prefix.HL_TWITTER_DB_PREFIX."replies` (

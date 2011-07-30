@@ -3,7 +3,7 @@ Contributors: Dachande663
 Donate link: http://hybridlogic.co.uk/code/wordpress-plugins/hl-twitter/
 Tags: twitter, tweet, post, auto tweet, social, social media, backup, hybridlogic, archive, shortcode, widget
 Requires at least: 2.9.2
-Tested up to: 3.1
+Tested up to: 3.2
 Stable tag: trunk
 
 HL Twitter stores tweets from multiple accounts and displays them via widget, archives and shortcodes as well as auto-tweeting new posts.
@@ -113,6 +113,10 @@ This was an issue caused by certain versions of PHP truncating the IDs when it l
 2. Default widget styling with the WordPress TwentyTen theme.
 
 == Changelog ==
+
+= 2011.7.30 =
+* Updated to support WordPress 3.2
+* Removed all dependancies on the source website
 
 = 2011.5.21 =
 * Updated the Twitter library so HL Twitter should work on more blogs now

@@ -4,10 +4,10 @@ Plugin Name: HL Twitter
 Plugin URI: http://hybridlogic.co.uk/code/wordpress-plugins/hl-twitter/
 Description: Pulls in all tweets and optionally sends new tweets
 Author: Luke Lanchester
-Version: 2011.5.21
+Version: 2011.7.30
 Author URI: http://www.lukelanchester.com/
 Created: 2010-07-25
-Modified: 2010-05-21
+Modified: 2011-07-30
 */
 @session_start(); // needed for oauth
 
@@ -42,7 +42,6 @@ if(!class_exists('EpiTwitter')) require_once HL_TWITTER_DIR.'api/EpiTwitter.php'
 require_once HL_TWITTER_DIR.'functions.php'; # Utility functions + helpers
 require_once HL_TWITTER_DIR.'import.php'; # Cron + import functions
 require_once HL_TWITTER_DIR.'widget.php'; # Widget class
-require_once HL_TWITTER_DIR.'hl_feedback.php'; # HL Feedback Library
 
 add_action('init', 'hl_twitter_init'); # On load, for (old) cron jobs
 add_filter('query_vars', 'hl_twitter_add_query_vars');

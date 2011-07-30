@@ -12,20 +12,7 @@ function hl_twitter_admin_menu() {
 	add_meta_box('hl_twitter_box', 'Tweet Post', 'hl_twitter_post_box', 'post', 'advanced');
 	add_meta_box('hl_twitter_box', 'Tweet Page', 'hl_twitter_post_box', 'page', 'advanced');
 	
-	# Feedback page
-	add_submenu_page('hl_twitter', 'Feedback', 'Feedback', 'manage_options', 'hl_twitter_feedback', 'hl_twitter_feedback');
-	
 } // end func: hl_twitter_admin_menu
-
-
-
-/*
-	Feedback page via HL Feedback
-*/
-function hl_twitter_feedback() {
-	$feedback = new hl_feedback('hl_twitter', HL_TWITTER_DIR.'hl_twitter.php');
-	$feedback->render();
-} // end func: hl_twitter_feedback
 
 
 
