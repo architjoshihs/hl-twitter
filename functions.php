@@ -42,7 +42,7 @@ function hl_twitter_shortcode_default($tweets, $num_tweets) {
 
 	return $output.'</ul></div>';
 
-} // end func: hl_twitter_shortcode_default
+}
 
 
 
@@ -61,7 +61,7 @@ function hl_twitter_add_rewrite_rules() {
 	add_rewrite_rule($slug.$regex, $redirect, 'top');
 	flush_rewrite_rules(false);
 
-} // end func: hl_twitter_add_rewrite_rules
+}
 
 
 
@@ -80,7 +80,7 @@ function hl_twitter_add_query_vars($query_vars) {
 
 	return $query_vars;
 
-} // end func: hl_twitter_add_query_vars
+}
 
 
 
@@ -113,7 +113,7 @@ function hl_twitter_rewrite_parse_request() {
  **/
 function hl_twitter_get_archives_root() {
 	return get_bloginfo('wpurl') . '/' . get_option(HL_TWITTER_ARCHIVES_SLUG_KEY, 'hl-twitter');
-} // end func: hl_twitter_get_archives_root
+}
 
 
 
@@ -130,9 +130,9 @@ function hl_twitter_init() {
 
 	$result = hl_twitter_import();
 	if($result['status'] === 'success') {
-		echo '<p>Import completed successfully.</p>';
+		echo '<p>' . __('Import completed successfully.', 'hl-twitter') . '</p>';
 	} else {
-		echo '<p>One or more errors were encountered while importing.';
+		echo '<p>' . __('One or more errors were encountered while importing.', 'hl-twitter') . '</p>';
 	}
 
 	echo '<ul><li>' . implode('</li><li>', $result['lines']) . '</li></ul>';
@@ -140,7 +140,7 @@ function hl_twitter_init() {
 	die();
 
 
-} // end func: hl_twitter_init
+}
 
 
 
@@ -151,7 +151,7 @@ function hl_twitter_init() {
  **/
 function hl_twitter_is_oauth_verified() {
 	return (get_option(HL_TWITTER_OAUTH_TOKEN) != '') ? true : false;
-} // end func: hl_twitter_is_oauth_verified
+}
 
 
 
@@ -179,7 +179,7 @@ function hl_twitter_get_api() {
 
 	return $hl_twitter_api;
 
-} // end func: hl_twitter_get_api
+}
 
 
 
@@ -211,7 +211,7 @@ function hl_twitter_tweet($tweet) {
 
 	return false;
 
-} // end func: hl_twitter_tweet
+}
 
 
 
@@ -289,7 +289,7 @@ function hl_twitter_generate_post_tweet_text($post_id) {
 	$tweet = strtr($tweet_format, $pairs);
 	return $tweet;
 
-} // end func: hl_twitter_generate_post_tweet_text
+}
 
 
 
@@ -302,7 +302,7 @@ function hl_twitter_generate_post_tweet_text($post_id) {
  **/
 function hl_twitter_get_avatar($url) {
 	return $url;
-} // end func: hl_twitter_get_avatar
+}
 
 
 
@@ -314,10 +314,10 @@ function hl_twitter_get_avatar($url) {
 function hl_twitter_show_tweet($tweet) {
 	$tweet = preg_replace("#(^|[\n ])([\w]+?://[\w]+[^ \"\n\r\t< ]*)#", "\\1<a href=\"\\2\">\\2</a>", $tweet);
 	$tweet = preg_replace("#(^|[\n ])((www|ftp)\.[^ \"\t\n\r< ]*)#", "\\1<a href=\"http://\\2\">\\2</a>", $tweet);
-	$tweet = preg_replace("/@(\w+)/", "<a href=\"http://twitter.com/\\1\">@\\1</a>", $tweet);
-	$tweet = preg_replace("/#(\w+)/", "<a href=\"http://search.twitter.com/search?q=\\1\">#\\1</a>", $tweet);
+	$tweet = preg_replace("/@(\w+)/", "<a href=\"https://twitter.com/\\1\">@\\1</a>", $tweet);
+	$tweet = preg_replace("/#(\w+)/", "<a href=\"https://twitter.com/search?q=\\1\">#\\1</a>", $tweet);
 	return $tweet;
-} // end func: hl_twitter_show_tweet
+}
 
 
 
@@ -385,7 +385,7 @@ function hl_twitter_display_widget(
 	}
 
 
-} // end func: hl_twitter_display_widget
+}
 
 
 
@@ -434,7 +434,7 @@ function hl_twitter_display_shortcode($atts) {
 
 	return hl_twitter_shortcode_default($tweets, $num_tweets);
 
-} // end func: hl_twitter_display_shortcode
+}
 
 
 
@@ -445,7 +445,7 @@ function hl_twitter_display_shortcode($atts) {
  **/
 function hl_twitter_cron_handler() {
 	hl_twitter_import();
-} // end func: hl_twitter_cron_handler
+}
 
 
 
@@ -493,7 +493,7 @@ function hl_twitter_cron_schedules($schedules) {
 
 	return $schedules;
 
-} // end func: hl_twitter_cron_schedules
+}
 
 
 
@@ -566,7 +566,7 @@ function hl_twitter_build_tweets_query_object($params) {
 	$query->sql = $query->select.' '.$query->from.' '.$query->join.' '.$query->where.' '.$query->order.' '.$query->limit;
 	return $query;
 
-} // end func: hl_twitter_build_tweets_query_object
+}
 
 
 
@@ -660,7 +660,7 @@ function hl_twitter_install() {
 	";
 	$wpdb->query($sql);
 
-} // end func: hl_twitter_install
+}
 
 
 
@@ -672,7 +672,7 @@ function hl_twitter_install() {
 function hl_twitter_uninstall() {
 	# Leave tables alone, just in case
 	wp_clear_scheduled_hook(HL_TWITTER_SCHEDULED_EVENT_ACTION); # Remove cron
-} // end func: hl_twitter_uninstall
+}
 
 
 
@@ -702,7 +702,7 @@ if(!function_exists('hl_time_ago')):
 		if($months<=12) return $months.' '.hl_plural($months,'month');
 		$years = round($seconds/31557600);
 		return $years.' '.hl_plural($years,'year');
-	} // end func: hl_time_ago
+	}
 endif;
 
 
@@ -718,7 +718,7 @@ if(!function_exists('hl_plural')):
 		if($num==1) return $single;
 		if($plural) return $plural;
 		return $single.'s';
-	} // end func: hl_plural
+	}
 endif;
 
 
@@ -732,7 +732,7 @@ if(!function_exists('hl_percent')) {
 	function hl_percent($numerator, $denominator=100) {
 		if($denominator==0) return 0;
 		return round($numerator/$denominator*100);
-	} // end func: hl_percent
+	}
 }
 
 
@@ -749,7 +749,7 @@ if(!function_exists('hl_print_r')) {
 			print_r($arg);
 		}
 		echo '</pre>';
-	} // end func: hl_print_r
+	}
 }
 
 
@@ -766,7 +766,7 @@ if(!function_exists('hl_var_dump')) {
 			var_dump($arg);
 		}
 		echo '</pre>';
-	} // end func: hl_var_dump
+	}
 }
 
 
@@ -779,7 +779,7 @@ if(!function_exists('hl_var_dump')) {
 if(!function_exists('hl_e')) {
 	function hl_e($str) {
 		return htmlspecialchars($str);
-	} // end func: hl_e
+	}
 }
 
 
@@ -797,5 +797,5 @@ if(!function_exists('hl_slugify')) {
 		$str = preg_replace('~[^\\pL\d]+~u', '-', $str);
 		$str = preg_replace('~[^-\w]+~', '', $str);
 		return $str;
-	} // end func: hl_slugify
+	}
 }

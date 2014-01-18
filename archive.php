@@ -147,7 +147,7 @@ function hl_twitter_display_archive_page($arg_username = false, $arg_year = fals
 	}
 	die();
 
-} // end func: hl_twitter_display_archive_page
+}
 
 
 
@@ -182,4 +182,4 @@ function hl_twitter_archive_link($change=array()) {
 
 	return $url;
 
-} // end func: hl_twitter_archive_link
+}

@@ -3,7 +3,7 @@ Contributors: Dachande663
 Donate link: http://hybridlogic.co.uk/code/wordpress-plugins/hl-twitter/
 Tags: twitter, tweet, post, auto tweet, social, social media, backup, hybridlogic, archive, shortcode, widget
 Requires at least: 2.9.2
-Tested up to: 3.5.1
+Tested up to: 3.8
 Stable tag: trunk
 License: MIT
 
@@ -116,6 +116,11 @@ This was an issue caused by certain versions of PHP truncating the IDs when it l
 2. Default widget styling with the WordPress TwentyTen theme.
 
 == Changelog ==
+
+= 2014.1.18 =
+* New logo for WordPress 3.8 users
+* Added initial support translations! Please contact me via @Dachande663 if you wish to submit a translation
+* Added suppot for the latest Twitter API changes
 
 = 2013.1.25 =
 * Updated to Twitter 1.1 API

@@ -15,7 +15,7 @@ class hl_twitter_widget extends WP_Widget {
 		parent::__construct(false, $name = 'HL Twitter', array(
 			'description' => 'Shows a list of recent tweets on your website.'
 		));
-	} // end func: __construct
+	}
 
 
 
@@ -30,7 +30,7 @@ class hl_twitter_widget extends WP_Widget {
 			$instance['show_avatars'], $instance['show_powered_by'], $instance['show_more_link'],
 			$args['before_widget'], $args['after_widget'], $args['before_title'], $args['after_title'], 'hl_twitter_widget.php'
 		);
-	} // end func: widget
+	}
 
 
 
@@ -52,7 +52,7 @@ class hl_twitter_widget extends WP_Widget {
 
 		return $instance;
 
-	} // end func: update
+	}
 
 
 
@@ -121,7 +121,7 @@ class hl_twitter_widget extends WP_Widget {
 		</p>
 
 		<?php
-	} // end func: form
+	}
 
 
 

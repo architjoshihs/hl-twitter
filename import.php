@@ -71,7 +71,7 @@ function hl_twitter_import($user_id = false) {
 		'lines'  => $lines
 	);
 
-} // end func: hl_twitter_import
+}
 
 
 
@@ -214,7 +214,7 @@ function hl_twitter_import_tweets($api, $users) {
 
 	return $lines;
 
-} // end func: hl_twitter_import_tweets
+}
 
 
 
@@ -309,7 +309,7 @@ function hl_twitter_import_tweet_replies($api, $tweet_reply_ids) {
 	$lines[] = "$new_tweets replied to tweet(s) were added to your database.";
 	return $lines;
 
-} // end func: hl_twitter_import_tweet_replies
+}
 
 
 
@@ -395,4 +395,4 @@ function hl_twitter_import_user_data($api, $users) {
 
 	return $lines;
 
-} // end func: hl_twitter_import_user_data
+}

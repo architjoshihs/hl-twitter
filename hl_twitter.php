@@ -4,10 +4,11 @@ Plugin Name: HL Twitter
 Plugin URI: http://hybridlogic.co.uk/code/wordpress-plugins/hl-twitter/
 Description: A plugin to display and store your Twitter archive, and send out new tweets on publish.
 Author: Luke Lanchester
-Version: 2013.1.25
+Version: 2014.1.18
+Text Domain: hl-twitter
 Author URI: http://www.hybridlogic.co.uk/
 Created: 2010-07-25
-Modified: 2013-01-125
+Modified: 2014-01-18
 */
 
 @session_start(); // needed for oauth
@@ -39,16 +40,16 @@ Modified: 2013-01-125
 
 
 // Includes
-	require_once HL_TWITTER_DIR.'admin.php'; # Admin views + functionality
-	require_once HL_TWITTER_DIR.'archive.php'; # Archive view
+	require_once HL_TWITTER_DIR . 'admin.php'; # Admin views + functionality
+	require_once HL_TWITTER_DIR . 'archive.php'; # Archive view
 
 	if(!class_exists('EpiCurl')) require_once HL_TWITTER_DIR.'api/EpiCurl.php'; # cURL wrapper
 	if(!class_exists('EpiOAuth')) require_once HL_TWITTER_DIR.'api/EpiOAuth.php'; # OAuth wrapper
 	if(!class_exists('EpiTwitter')) require_once HL_TWITTER_DIR.'api/EpiTwitter.php'; # Twitter API
 
-	require_once HL_TWITTER_DIR.'functions.php'; # Utility functions + helpers
-	require_once HL_TWITTER_DIR.'import.php'; # Cron + import functions
-	require_once HL_TWITTER_DIR.'widget.php'; # Widget class
+	require_once HL_TWITTER_DIR . 'functions.php'; # Utility functions + helpers
+	require_once HL_TWITTER_DIR . 'import.php'; # Cron + import functions
+	require_once HL_TWITTER_DIR . 'widget.php'; # Widget class
 
 
 // Hooks
@@ -67,6 +68,3 @@ Modified: 2013-01-125
 	add_shortcode('hl-twitter', 'hl_twitter_display_shortcode'); # Add shortcode
 	register_activation_hook(__FILE__, 'hl_twitter_install');
 	register_deactivation_hook(__FILE__, 'hl_twitter_uninstall');
-
-
-

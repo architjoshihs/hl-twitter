@@ -6,15 +6,19 @@
  * @return void
  **/
 function hl_twitter_admin_menu() {
-	add_menu_page('HL Twitter', 'HL Twitter', 'manage_options', 'hl_twitter', 'hl_twitter_admin_view_tweets', HL_TWITTER_URL.'menu_icon.png');
+	global $wp_version;
+
+	$icon = version_compare($wp_version, '3.8', '>=') ? 'menu_icon.png' : 'menu_icon_legacy.png';
+
+	add_menu_page('HL Twitter', 'HL Twitter', 'manage_options', 'hl_twitter', 'hl_twitter_admin_view_tweets', HL_TWITTER_URL . $icon);
 	add_submenu_page('hl_twitter', 'Tweets', 'Tweets', 'manage_options', 'hl_twitter', 'hl_twitter_admin_view_tweets');
-	add_submenu_page('hl_twitter', 'Users', 'Users', 'manage_options', 'hl_twitter_users', 'hl_twitter_admin_view_users');
-	add_submenu_page('hl_twitter', 'Settings', 'Settings', 'manage_options', 'hl_twitter_settings', 'hl_twitter_settings');
+	add_submenu_page('hl_twitter', __('Users', 'hl-twitter'), __('Users', 'hl-twitter'), 'manage_options', 'hl_twitter_users', 'hl_twitter_admin_view_users');
+	add_submenu_page('hl_twitter', __('Settings', 'hl-twitter'), __('Settings', 'hl-twitter'), 'manage_options', 'hl_twitter_settings', 'hl_twitter_settings');
 
-	add_meta_box('hl_twitter_box', 'Tweet Post', 'hl_twitter_post_box', 'post', 'advanced');
-	add_meta_box('hl_twitter_box', 'Tweet Page', 'hl_twitter_post_box', 'page', 'advanced');
+	add_meta_box('hl_twitter_box', __('Tweet Post', 'hl-twitter'), 'hl_twitter_post_box', 'post', 'advanced');
+	add_meta_box('hl_twitter_box', __('Tweet Page', 'hl-twitter'), 'hl_twitter_post_box', 'page', 'advanced');
 
-} // end func: hl_twitter_admin_menu
+}
 
 
 
@@ -45,7 +49,7 @@ function hl_twitter_publish_post($post_id) {
 		update_post_meta($post_id, HL_TWITTER_AUTO_TWEET_POSTMETA, $tweet);
 	}
 
-} // end func: hl_twitter_publish_post
+}
 
 
 
@@ -55,8 +59,8 @@ function hl_twitter_publish_post($post_id) {
  * @return void
  **/
 function hl_twitter_add_dashboard_widget() {
-	wp_add_dashboard_widget('hl_twitter_dashboard_widget', 'Tweet Now!', 'hl_twitter_dashboard_widget');
-} // end func: hl_twitter_add_dashboard_widget
+	wp_add_dashboard_widget('hl_twitter_dashboard_widget', __('Tweet Now!', 'hl-twitter'), 'hl_twitter_dashboard_widget');
+}
 
 
 
@@ -71,7 +75,7 @@ function hl_twitter_dashboard_widget() {
 
 	<form method="post" action="">
 		<p id="hl_twitter_dash_chars" style="float:right;margin:0;width:30px">140</p>
-		<p id="hl_twitter_dash_response" style="margin-right:35px">Make a new tweet straight from your Dashboard!</p>
+		<p id="hl_twitter_dash_response" style="margin-right:35px"><?php _e('Make a new tweet straight from your Dashboard!'); ?></p>
 		<p><textarea name="hl_twitter_dash_new_tweet" id="hl_twitter_dash_new_tweet" style="width:100%"></textarea></p>
 		<p style="text-align:right"><input type="submit" class="button" name="hl_twitter_dash_submit" id="hl_twitter_dash_submit" value="Tweet" /></p>
 	</form>
@@ -85,7 +89,7 @@ function hl_twitter_dashboard_widget() {
 		});
 
 		$("#hl_twitter_dash_submit").click(function(){
-			$("#hl_twitter_dash_response").text("Sending...");
+			$("#hl_twitter_dash_response").text("<?php _e('Sending...', 'hl-twitter'); ?>");
 			jQuery.post(
 				ajaxurl,
 				{
@@ -94,11 +98,11 @@ function hl_twitter_dashboard_widget() {
 				},
 				function(response) {
 					if(response.status=="success") {
-						$("#hl_twitter_dash_response").text("Tweeted! Tweet again?");
+						$("#hl_twitter_dash_response").text("<?php _e('Tweeted! Tweet again?'); ?>");
 						$("#hl_twitter_dash_new_tweet").val("");
 						$("#hl_twitter_dash_chars").text("140");
 					} else {
-						$("#hl_twitter_dash_response").text("Error: "+response.error);
+						$("#hl_twitter_dash_response").text("<?php _e('Error'); ?>: "+response.error);
 					}
 				},
 				"json"
@@ -111,7 +115,7 @@ function hl_twitter_dashboard_widget() {
 
 	<?php
 
-} // end func: hl_twitter_dashboard_widget
+}
 
 
 
@@ -123,23 +127,31 @@ function hl_twitter_dashboard_widget() {
 function hl_twitter_ajax_new_tweet() {
 
 	$tweet = stripslashes(trim($_POST['hl_tweet']));
-	if($tweet=='')
-		die('{"status":"error","error":"Please make sure you have entered a tweet."}');
+	if($tweet=='') {
+		echo json_encode(array('status' => 'error', 'error' => __('Please make sure you have entered a tweet.', 'hl-twitter')));
+		die();
+	}
 
-	if(strlen($tweet)>140)
-		die('{"status":"error","error":"Your tweet is longer than 140 characters."}');
+	if(strlen($tweet)>140) {
+		echo json_encode(array('status' => 'error', 'error' => __('Your tweet is longer than 140 characters.', 'hl-twitter')));
+		die();
+	}
 
-	if(md5($tweet)==$_SESSION['hl_twitter_ajax_last_tweet'])
-		die('{"status":"error","error":"This tweet appears to be a duplicate."}');
+	if(md5($tweet)==$_SESSION['hl_twitter_ajax_last_tweet']) {
+		echo json_encode(array('status' => 'error', 'error' => __('This tweet appears to be a duplicate.', 'hl-twitter')));
+		die();
+	}
 
 	$response = hl_twitter_tweet($tweet);
-	if(!$response)
-		die('{"status":"error","error":"Could not connect to Twitter."}');
+	if(!$response) {
+		echo json_encode(array('status' => 'error', 'error' => __('Could not connect to Twitter.', 'hl-twitter')));
+		die();
+	}
 
 	$_SESSION['hl_twitter_ajax_last_tweet'] = md5($tweet);
 	die('{"status":"success"}');
 
-} // end func: hl_twitter_ajax_new_tweet
+}
 
 
 
@@ -154,9 +166,14 @@ function hl_twitter_post_box($post) {
 
 	if($post->post_status!='publish') {
 		if($auto_tweet_enabled) {
-			echo '<p><input type="checkbox" name="hl_twitter_auto_tweet" checked="checked" /> If ticked, a tweet will be automatically created for this '.$post->post_type.' based on your Twitter settings.</p>';
+			echo '
+				<p>
+					<input type="checkbox" name="hl_twitter_auto_tweet" checked="checked" />
+					' . printf(__('If ticked, a tweet will be automatically created for this %s based on your Twitter settings.', 'hl-twitter'), $post->post_type) . '
+				</p>
+			';
 		} else {
-			echo '<p>When you have published this '.$post->post_type.', you can tweet a link to it from here.</p>';
+			echo '<p>' . printf(__('When you have published this %s, you can tweet a link to it from here.', 'hl-twitter'), $post->post_type) . '</p>';
 		}
 		return;
 	}
@@ -168,8 +185,8 @@ function hl_twitter_post_box($post) {
 	</p>
 	<p>
 		<span id="hl_twitter_box_chars" style="float:right">140</span>
-		<input class="button" type="button" name="hl_twitter_box_submit" id="hl_twitter_box_submit" value="Tweet Now!" />
-		<span id="hl_twitter_box_response">The text above will be posted to Twitter straight away when you click the button.</span>
+		<input class="button" type="button" name="hl_twitter_box_submit" id="hl_twitter_box_submit" value="<?php _e('Tweet Now!', 'hl-twitter'); ?>" />
+		<span id="hl_twitter_box_response"><?php _e('The text above will be posted to Twitter straight away when you click the button.', 'hl-twitter'); ?></span>
 	</p>
 
 	<script type="text/javascript">
@@ -183,7 +200,7 @@ function hl_twitter_post_box($post) {
 		$("#hl_twitter_box_tweet").keyup(); // Trigger character count on load
 
 		$("#hl_twitter_box_submit").click(function(){
-			$("#hl_twitter_box_response").text("Tweeting...");
+			$("#hl_twitter_box_response").text("<?php _e('Tweeting...', 'hl-twitter'); ?>");
 			jQuery.post(
 				ajaxurl,
 				{
@@ -192,11 +209,11 @@ function hl_twitter_post_box($post) {
 				},
 				function(response) {
 					if(response.status=="success") {
-						$("#hl_twitter_box_response").text("Your tweet has been sent to Twitter.");
+						$("#hl_twitter_box_response").text("<?php _e('Your tweet has been sent to Twitter.', 'hl-twitter'); ?>");
 						$("#hl_twitter_box_tweet").val("");
 						$("#hl_twitter_box_chars").text("140");
 					} else {
-						$("#hl_twitter_box_response").text("Error: "+response.error);
+						$("#hl_twitter_box_response").text("<?php _e('Error', 'hl-twitter'); ?>: "+response.error);
 					}
 				},
 				"json"
@@ -209,7 +226,7 @@ function hl_twitter_post_box($post) {
 	</script>
 
 	<?php
-} // end func: hl_twitter_post_box
+}
 
 
 
@@ -307,31 +324,31 @@ function hl_twitter_admin_view_tweets() {
 	<form method="get" action="<?php echo $pagination_url; ?>">
 		<input type="hidden" name="page" value="hl_twitter" />
 
-		<h2>Tweets</h2>
+		<h2><?php _e('Tweets', 'hl-twitter'); ?></h2>
 
 		<p class="search-box">
-			<label class="screen-reader-text" for="post-search-input">Search Tweets:</label>
+			<label class="screen-reader-text" for="post-search-input"><?php _e('Search Tweets', 'hl-twitter'); ?>:</label>
 			<input type="text" id="post-search-input" name="s" value="<?php echo hl_e($filters['s']); ?>">
-			<input type="submit" value="Search Tweets" class="button">
+			<input type="submit" value="<?php _e('Search Tweets', 'hl-twitter'); ?>" class="button">
 		</p>
 
 		<div class="tablenav">
 			<div class="alignleft actions">
 				<select name="user">
-					<option value="0">All users</option>
+					<option value="0"><?php _e('All users', 'hl-twitter'); ?></option>
 					<?php foreach($tracked_users as $tracked_user): ?>
 						<option value="<?php echo $tracked_user->twitter_user_id; ?>" <?php if($filters['user']==$tracked_user->twitter_user_id) echo 'selected="selected"'; ?>><?php echo hl_e($tracked_user->screen_name); ?></option>
 					<?php endforeach; ?>
 				</select>
-				<label for="hl_dates">From:</label> <input type="text" name="dates" id="hl_dates" class="hl_datepick" value="<?php echo $filters['dates']; ?>" size="12" />
-				<label for="hl_datee">To:</label> <input type="text" name="datee" id="hl_datee" class="hl_datepick" value="<?php echo $filters['datee']; ?>" size="12" />
+				<label for="hl_dates"><?php _ex('From', 'date', 'hl-twitter'); ?>:</label> <input type="text" name="dates" id="hl_dates" class="hl_datepick" value="<?php echo $filters['dates']; ?>" size="12" />
+				<label for="hl_datee"><?php _ex('To', 'date', 'hl-twitter'); ?>:</label> <input type="text" name="datee" id="hl_datee" class="hl_datepick" value="<?php echo $filters['datee']; ?>" size="12" />
 				<input type="submit" value="Apply" class="button-secondary" />
 				<?php if(count($filters)>0): ?>
-					<a href="admin.php?page=hl_twitter">clear</a>
+					<a href="admin.php?page=hl_twitter"><?php _e('clear', 'hl-twitter'); ?></a>
 				<?php endif; ?>
 			</div>
 			<div class="tablenav-pages">
-				<span class="displaying-num">Displaying <?php echo number_format(($current_page-1)*$per_page+1); ?>&ndash;<?php echo number_format(($current_page-1)*$per_page+$num_objects); ?> of <?php echo number_format($total_objects); ?></span>
+				<span class="displaying-num"><?php _e('Displaying', 'hl-twitter'); ?> <?php echo number_format(($current_page-1)*$per_page+1); ?>&ndash;<?php echo number_format(($current_page-1)*$per_page+$num_objects); ?> of <?php echo number_format($total_objects); ?></span>
 				<?php echo $pagination; ?>
 			</div>
 		</div>
@@ -339,18 +356,18 @@ function hl_twitter_admin_view_tweets() {
 			<thead>
 				<tr>
 					<th scope="col" class="manage-column column-title" width="65">&nbsp;</th>
-					<th scope="col" class="manage-column column-title" width="125">Name</th>
-					<th scope="col" class="manage-column column-title">Tweet</th>
-					<th scope="col" class="manage-column column-title" width="175">Created</th>
+					<th scope="col" class="manage-column column-title" width="125"><?php _e('Name', 'hl-twitter'); ?></th>
+					<th scope="col" class="manage-column column-title"><?php _e('Tweet', 'hl-twitter'); ?></th>
+					<th scope="col" class="manage-column column-title" width="175"><?php _e('Created', 'hl-twitter'); ?></th>
 					<th scope="col" class="manage-column column-title" width="95">&nbsp;</th>
 				</tr>
 			</thead>
 			<tfoot>
 				<tr>
 					<th scope="col" class="manage-column column-title">&nbsp;</th>
-					<th scope="col" class="manage-column column-title">Name</th>
-					<th scope="col" class="manage-column column-title">Tweet</th>
-					<th scope="col" class="manage-column column-title">Created</th>
+					<th scope="col" class="manage-column column-title"><?php _e('Name', 'hl-twitter'); ?></th>
+					<th scope="col" class="manage-column column-title"><?php _e('Tweet', 'hl-twitter'); ?></th>
+					<th scope="col" class="manage-column column-title"><?php _e('Created', 'hl-twitter'); ?></th>
 					<th scope="col" class="manage-column column-title">&nbsp;</th>
 				</tr>
 			</tfoot>
@@ -366,19 +383,19 @@ function hl_twitter_admin_view_tweets() {
 							<td><?php echo hl_twitter_show_tweet($object->tweet); ?></td>
 							<td>
 								<?php echo hl_e($object->created); ?><br />
-								<em><?php echo hl_time_ago($object->created); ?> ago</em>
+								<em><?php echo hl_time_ago($object->created); ?> <?php _e('ago', 'hl-twitter'); ?></em>
 							</td>
-							<td><a href="admin.php?page=hl_twitter&amp;action=edit&amp;id=<?php echo hl_e($object->id); ?>">edit</a> | <a href="admin.php?page=hl_twitter&amp;action=delete&amp;id=<?php echo hl_e($object->id); ?>">delete</a></td>
+							<td><a href="admin.php?page=hl_twitter&amp;action=edit&amp;id=<?php echo hl_e($object->id); ?>"><?php _e('edit', 'hl-twitter'); ?></a> | <a href="admin.php?page=hl_twitter&amp;action=delete&amp;id=<?php echo hl_e($object->id); ?>"><?php _e('delete', 'hl-twitter'); ?></a></td>
 						</tr>
 					<?php endforeach; ?>
 				<?php else: ?>
-					<tr><td colspan="5">No tweets were found.</td></tr>
+					<tr><td colspan="5"><?php _e('No tweets were found.', 'hl-twitter'); ?></td></tr>
 				<?php endif; ?>
 			</tbody>
 		</table>
 		<div class="tablenav">
 			<div class="tablenav-pages">
-				<span class="displaying-num">Displaying <?php echo number_format(($current_page-1)*$per_page+1); ?>&ndash;<?php echo number_format(($current_page-1)*$per_page+$num_objects); ?> of <?php echo number_format($total_objects); ?></span>
+				<span class="displaying-num"><?php _e('Displaying', 'hl-twitter'); ?> <?php echo number_format(($current_page-1)*$per_page+1); ?>&ndash;<?php echo number_format(($current_page-1)*$per_page+$num_objects); ?> of <?php echo number_format($total_objects); ?></span>
 				<?php echo $pagination; ?>
 			</div>
 		</div>
@@ -386,7 +403,7 @@ function hl_twitter_admin_view_tweets() {
 	</div>
 	<?php
 
-} // end func: hl_twitter_admin_view_tweets
+}
 
 
 
@@ -407,7 +424,7 @@ function hl_twitter_admin_edit_tweet($id) {
 		WHERE id=%d
 		LIMIT 1
 	', $id));
-	if(!$object) return hl_twitter_error('The selected tweet could not be found.');
+	if(!$object) return hl_twitter_error(__('The selected tweet could not be found.', 'hl-twitter'));
 
 
 	// Submit
@@ -420,9 +437,9 @@ function hl_twitter_admin_edit_tweet($id) {
 		$object->source  = stripslashes($_POST['source']);
 
 		$errors = array();
-		if($object->tweet=='') $errors[] = 'make sure you have entered a tweet';
-		if(strlen($object->tweet)>140) $errors[] = 'make sure your tweet is 140 characters or less';
-		if($object_created<946684800) $errors[] = 'make sure you have entered a valid date';
+		if($object->tweet=='') $errors[] = __('make sure you have entered a tweet', 'hl-twitter');
+		if(strlen($object->tweet)>140) $errors[] =__( 'make sure your tweet is 140 characters or less', 'hl-twitter');
+		if($object_created<946684800) $errors[] = __('make sure you have entered a valid date', 'hl-twitter');
 
 		if(count($errors)==0) {
 
@@ -431,16 +448,16 @@ function hl_twitter_admin_edit_tweet($id) {
 				'UPDATE '.HL_TWITTER_DB_PREFIX.'tweets SET tweet=%s, lat=%f, lon=%f, created=%s, source=%s WHERE id=%d LIMIT 1',
 				$object->tweet, $object->lat, $object->lon, $object->created, $object->source, $object->id
 			));
-			$msg_updated = 'Tweet updated successfully.';
+			$msg_updated = __('Tweet updated successfully.'. 'hl-twitter');
 		} else {
-			$msg_error = 'Error(s) were encountered saving your tweet: '.implode(', ', $errors).'.';
+			$msg_error = __('One or more errors were encountered while saving your tweet', 'hl-twitter') . ': '.implode(', ', $errors).'.';
 		}
 
 	} // end POST
 
 ?>
 <div class="wrap">
-	<h2>Edit Tweet</h2>
+	<h2><?php _e('Edit Tweet', 'hl-twitter'); ?></h2>
 
 	<?php if($msg_updated): ?><div class="updated"><p><?php echo $msg_updated; ?></p></div><?php endif; ?>
 	<?php if($msg_error): ?><div class="error"><p><?php echo $msg_error; ?></p></div><?php endif; ?>
@@ -448,34 +465,34 @@ function hl_twitter_admin_edit_tweet($id) {
 	<form method="post" action="admin.php?page=hl_twitter&amp;action=edit&amp;id=<?php echo $object->id; ?>">
 		<table class="form-table">
 			<tr>
-				<th scope="row">Tweet</th>
+				<th scope="row"><?php _e('Tweet', 'hl-twitter'); ?></th>
 				<td><textarea name="tweet" rows="3" cols="50"><?php echo hl_e($object->tweet); ?></textarea></td>
 			</tr>
 			<tr>
-				<th scope="row">Geo</th>
+				<th scope="row"><?php _e('Geo', 'hl-twitter'); ?></th>
 				<td>
 					<input type="text" name="lat" value="<?php echo hl_e($object->lat); ?>" size="11" />,
 					<input type="text" name="lon" value="<?php echo hl_e($object->lon); ?>" size="11" />
 				</td>
 			</tr>
 			<tr>
-				<th scope="row">Tweeted</th>
+				<th scope="row"><?php _e('Tweeted', 'hl-twitter'); ?></th>
 				<td><input type="text" name="created" value="<?php echo date_i18n('Y-m-d H:i:s', strtotime($object->created)); ?>" size="30" /></td>
 			</tr>
 			<tr>
-				<th scope="row">Source</th>
+				<th scope="row"><?php _e('Source', 'hl-twitter'); ?></th>
 				<td><input type="text" name="source" value="<?php echo hl_e($object->source); ?>" size="30" /></td>
 			</tr>
 		</table>
 		<div class="submit">
-			<a href="admin.php?page=hl_twitter" class="button-secondary">Cancel</a>
-			<input type="submit" name="submit" value="Save" class="button-primary" />
+			<a href="admin.php?page=hl_twitter" class="button-secondary"><?php _e('Cancel', 'hl-twitter'); ?></a>
+			<input type="submit" name="submit" value="<?php _e('Save', 'hl-twitter'); ?>" class="button-primary" />
 		</div>
 	</form>
 
 </div>
 <?php
-} // end func: hl_twitter_admin_edit_tweet
+}
 
 
 
@@ -495,7 +512,7 @@ function hl_twitter_admin_delete_tweet($id) {
 		FROM ' . HL_TWITTER_DB_PREFIX . 'tweets
 		WHERE id=%d
 	',$id));
-	if(!$object) return hl_twitter_error('The selected tweet could not be found.');
+	if(!$object) return hl_twitter_error(__('The selected tweet could not be found.', 'hl-twitter'));
 
 
 	// Submit
@@ -507,9 +524,9 @@ function hl_twitter_admin_delete_tweet($id) {
 		}
 		?>
 		<div class="wrap">
-			<h2>Delete Tweet</h2>
-			<p>The selected tweet has been deleted.</p>
-			<a href="admin.php?page=hl_twitter" class="button-primary">Back</a>
+			<h2><?php _e('Delete Tweet', 'hl-twitter'); ?></h2>
+			<p><?php _e('The selected tweet has been deleted.', 'hl-twitter'); ?></p>
+			<a href="admin.php?page=hl_twitter" class="button-primary"><?php _e('Back', 'hl-twitter'); ?></a>
 		</div>
 		<?php
 		return;
@@ -517,18 +534,18 @@ function hl_twitter_admin_delete_tweet($id) {
 
 	?>
 	<div class="wrap">
-		<h2>Delete Tweet</h2>
-		<p>Are you sure you wish to remove this tweet from the database? Please note, if this is the most recent tweet from this user it may be re-imported later on.</p>
+		<h2><?php _e('Delete Tweet', 'hl-twitter'); ?></h2>
+		<p><?php _e('Are you sure you wish to remove this tweet from the database? Please note, if this is the most recent tweet from this user it may be re-imported later on.', 'hl-twitter'); ?></p>
 		<form method="post" action="admin.php?page=hl_twitter&amp;action=delete&amp;id=<?php echo $object->id; ?>">
 			<p>
-				<a href="admin.php?page=hl_twitter" class="button-secondary">Cancel</a>
-				<input type="submit" name="submit" value="Delete" class="button-primary" />
+				<a href="admin.php?page=hl_twitter" class="button-secondary"><?php _e('Cancel', 'hl-twitter'); ?></a>
+				<input type="submit" name="submit" value="<?php _e('Delete', 'hl-twitter'); ?>" class="button-primary" />
 			</p>
 		</form>
 	</div>
 	<?php
 
-} // end func: hl_twitter_admin_delete_tweet
+}
 
 
 
@@ -558,30 +575,30 @@ function hl_twitter_admin_view_users() {
 	<form method="get" action="<?php echo $pagination_url; ?>">
 		<input type="hidden" name="page" value="hl_twitter" />
 
-		<h2>Twitter Users</h2>
+		<h2><?php _e('Twitter Users', 'hl-twitter'); ?></h2>
 
-		<p>Below are all Twitter users that you are tracking. All tweets made by these users will be recorded and stored on this website.</p>
+		<p><?php _e('Below are all Twitter users that you are tracking. All tweets made by these users will be recorded and stored on this website.', 'hl-twitter'); ?></p>
 
 		<table class="widefat post fixed" cellspacing="0" style="clear: none;">
 			<thead>
 				<tr>
 					<th scope="col" class="manage-column column-title" width="65">&nbsp;</th>
-					<th scope="col" class="manage-column column-title">Name</th>
-					<th scope="col" class="manage-column column-title">Tweets</th>
-					<th scope="col" class="manage-column column-title">Following</th>
-					<th scope="col" class="manage-column column-title">Followers</th>
-					<th scope="col" class="manage-column column-title">Registered</th>
+					<th scope="col" class="manage-column column-title"><?php _e('Name', 'hl-twitter'); ?></th>
+					<th scope="col" class="manage-column column-title"><?php _e('Tweets', 'hl-twitter'); ?></th>
+					<th scope="col" class="manage-column column-title"><?php _e('Following', 'hl-twitter'); ?></th>
+					<th scope="col" class="manage-column column-title"><?php _e('Followers', 'hl-twitter'); ?></th>
+					<th scope="col" class="manage-column column-title"><?php _e('Registered', 'hl-twitter'); ?></th>
 					<th scope="col" class="manage-column column-title" width="185">&nbsp;</th>
 				</tr>
 			</thead>
 			<tfoot>
 				<tr>
 					<th scope="col" class="manage-column column-title">&nbsp;</th>
-					<th scope="col" class="manage-column column-title">Name</th>
-					<th scope="col" class="manage-column column-title">Tweets</th>
-					<th scope="col" class="manage-column column-title">Following</th>
-					<th scope="col" class="manage-column column-title">Followers</th>
-					<th scope="col" class="manage-column column-title">Registered</th>
+					<th scope="col" class="manage-column column-title"><?php _e('Name', 'hl-twitter'); ?></th>
+					<th scope="col" class="manage-column column-title"><?php _e('Tweets', 'hl-twitter'); ?></th>
+					<th scope="col" class="manage-column column-title"><?php _e('Following', 'hl-twitter'); ?></th>
+					<th scope="col" class="manage-column column-title"><?php _e('Followers', 'hl-twitter'); ?></th>
+					<th scope="col" class="manage-column column-title"><?php _e('Registered', 'hl-twitter'); ?></th>
 					<th scope="col" class="manage-column column-title">&nbsp;</th>
 				</tr>
 			</tfoot>
@@ -602,20 +619,20 @@ function hl_twitter_admin_view_users() {
 								<em><?php echo number_format((time()-strtotime($object->registered))/86400); ?> days ago</em>
 							</td>
 							<td>
-								<a href="admin.php?page=hl_twitter_users&amp;action=edit&amp;id=<?php echo hl_e($object->twitter_user_id); ?>">edit</a> |
-								<a href="http://twitter.com/<?php echo hl_e($object->screen_name); ?>">twitter</a> |
-								<a href="admin.php?page=hl_twitter_users&amp;action=delete&amp;id=<?php echo hl_e($object->id); ?>">delete</a>
+								<a href="admin.php?page=hl_twitter_users&amp;action=edit&amp;id=<?php echo hl_e($object->twitter_user_id); ?>"><?php _e('edit', 'hl-twitter'); ?></a> |
+								<a href="http://twitter.com/<?php echo hl_e($object->screen_name); ?>"><?php _e('twitter', 'hl-twitter'); ?></a> |
+								<a href="admin.php?page=hl_twitter_users&amp;action=delete&amp;id=<?php echo hl_e($object->id); ?>"><?php _e('delete', 'hl-twitter'); ?></a>
 							</td>
 						</tr>
 					<?php endforeach; ?>
 				<?php else: ?>
-					<tr><td colspan="7">No users were found.</td></tr>
+					<tr><td colspan="7"><?php _e('No users were found.', 'hl-twitter'); ?></td></tr>
 				<?php endif; ?>
 			</tbody>
 		</table>
 		<div class="tablenav">
 			<div class="alignleft actions">
-				<p><a href="admin.php?page=hl_twitter_users&amp;action=new" class="button-primary">Add new User</a></p>
+				<p><a href="admin.php?page=hl_twitter_users&amp;action=new" class="button-primary"><?php _e('Add new User', 'hl-twitter'); ?></a></p>
 			</div>
 		</div>
 	</form>
@@ -623,7 +640,7 @@ function hl_twitter_admin_view_users() {
 
 	<?php
 
-} // end func: hl_twitter_admin_view_users
+}
 
 
 
@@ -644,7 +661,7 @@ function hl_twitter_admin_edit_user($twitter_user_id) {
 		WHERE twitter_user_id=%d
 		LIMIT 1
 	', $twitter_user_id));
-	if(!$object) return hl_twitter_error('The selected Twitter user could not be found.');
+	if(!$object) return hl_twitter_error(__('The selected Twitter user could not be found.', 'hl-twitter'));
 
 
 	// Num Tweets
@@ -663,43 +680,52 @@ function hl_twitter_admin_edit_user($twitter_user_id) {
 			SET pull_in_replies=%d
 			WHERE twitter_user_id=%d
 		', $object->pull_in_replies, $object->twitter_user_id));
-		$msg_updated = 'Your settings have been saved.';
+		$msg_updated = __('Your settings have been saved.', 'hl-twitter');
 	}
 
 	?>
 	<div class="wrap">
-		<h2>Edit <?php echo hl_e($object->screen_name); ?></h2>
+		<h2><?php printf(__('Edit %s', 'hl-twitter'), $object->screen_name); ?></h2>
 
 		<?php if($msg_updated): ?><div class="updated"><p><?php echo $msg_updated; ?></p></div><?php endif; ?>
 		<?php if($msg_error): ?><div class="error"><p><?php echo $msg_error; ?></p></div><?php endif; ?>
 
-		<p><?php echo hl_e($object->name); ?> has <?php echo number_format($object->num_tweets); ?> tweets of which <?php echo number_format($actual_num_tweets); ?> are stored on this site.</p>
+		<dl>
+			<dt><?php _e('Screen name', 'hl-twitter'); ?></dt>
+			<dd><?php echo hl_e($object->screen_name); ?></dd>
+			<dt><?php _e('Display name', 'hl-twitter'); ?></dt>
+			<dd><?php echo hl_e($object->name); ?></dd>
+			<dt><?php _e('Tweets made', 'hl-twitter'); ?></dt>
+			<dd><?php echo number_format($object->num_tweets); ?></dd>
+			<dt><?php _e('Tweets stored', 'hl-twitter'); ?></dt>
+			<dd><?php echo number_format($actual_num_tweets); ?></dd>
+		</dl>
 
 		<form method="post" action="admin.php?page=hl_twitter_users&amp;action=edit&amp;id=<?php echo $object->twitter_user_id; ?>">
 			<table class="form-table">
 				<tr>
-					<th scope="row">Store replied to tweets?</th>
+					<th scope="row"><?php _e('Store replied to tweets?', 'hl-twitter'); ?></th>
 					<td>
 						<select name="pull_in_replies">
-							<option value="0">Choose...</option>
-							<option value="1" <?php if($object->pull_in_replies==1) echo 'selected="selected"'; ?>>Yes</option>
-							<option value="0" <?php if($object->pull_in_replies==0) echo 'selected="selected"'; ?>>No</option>
+							<option value="0"><?php _e('Choose...', 'hl-twitter'); ?></option>
+							<option value="1" <?php if($object->pull_in_replies==1) echo 'selected="selected"'; ?>><?php _e('Yes', 'hl-twitter'); ?></option>
+							<option value="0" <?php if($object->pull_in_replies==0) echo 'selected="selected"'; ?>><?php _e('No', 'hl-twitter'); ?></option>
 						</select>
-						<br /><span class="description">HL Twitter can also store all tweets that are replied to for later recollection. This feature is off by default as it uses a larger percentage of your Twitter API allowance.</span>
+						<br /><span class="description"><?php _e('HL Twitter can also store all tweets that are replied to for later recollection. This feature is off by default as it uses a larger percentage of your Twitter API allowance.', 'hl-twitter'); ?></span>
 					</td>
 				</tr>
 			</table>
 			<div class="submit">
-				<a href="admin.php?page=hl_twitter_users" class="button-secondary">Cancel</a>
-				<a href="admin.php?page=hl_twitter_users&amp;action=import&amp;id=<?php echo $object->twitter_user_id; ?>" class="button-secondary">Import</a>
-				<input type="submit" name="submit" value="Save" class="button-primary" />
+				<a href="admin.php?page=hl_twitter_users" class="button-secondary"><?php _e('Cancel', 'hl-twitter'); ?></a>
+				<a href="admin.php?page=hl_twitter_users&amp;action=import&amp;id=<?php echo $object->twitter_user_id; ?>" class="button-secondary"><?php _e('Import', 'hl-twitter'); ?></a>
+				<input type="submit" name="submit" value="<?php _e('Save', 'hl-twitter'); ?>" class="button-primary" />
 			</div>
 		</form>
 
 	</div>
 	<?php
 
-} // end func: hl_twitter_admin_edit_user
+}
 
 
 
@@ -719,7 +745,7 @@ function hl_twitter_admin_delete_user($id) {
 		FROM ' . HL_TWITTER_DB_PREFIX . 'users
 		WHERE id=%d
 	',$id));
-	if(!$user) return hl_twitter_error('The selected user could not be found.');
+	if(!$user) return hl_twitter_error(__('The selected user could not be found.', 'hl-twitter'));
 
 
 	// Submit
@@ -738,9 +764,15 @@ function hl_twitter_admin_delete_user($id) {
 
 		?>
 		<div class="wrap">
-			<h2>Delete User</h2>
-			<p>The selected user has been deleted<?php if($_POST['delete_tweets']=='on'): ?> along with all of their tweets stored in the database<?php endif; ?>.</p>
-			<a href="admin.php?page=hl_twitter_users" class="button-primary">Back</a>
+			<h2><?php _e('Delete User', 'hl-twitter'); ?></h2>
+
+			<?php if($_POST['delete_tweets']=='on'): ?>
+				<p><?php _e('The selected user has been deleted along with all of their tweets stored in the database.', 'hl-twitter'); ?></p>
+			<?php else: ?>
+				<p><?php _e('The selected user has been deleted.', 'hl-twitter'); ?></p>
+			<?php endif; ?>
+
+			<a href="admin.php?page=hl_twitter_users" class="button-primary"><?php _e('Back', 'hl-twitter'); ?></a>
 		</div>
 		<?php
 		return;
@@ -750,19 +782,19 @@ function hl_twitter_admin_delete_user($id) {
 	// Confirm
 	?>
 	<div class="wrap">
-		<h2>Delete User</h2>
-		<p>Are you sure you wish to stop tracking <strong><?php echo hl_e($user->screen_name); ?></strong>? You can also choose to remove all of their tweets from the database.</p>
+		<h2><?php _e('Delete User', 'hl-twitter'); ?></h2>
+		<p><?php printf(__('Are you sure you wish to stop tracking <strong>%s</strong>? You can also choose to remove all of their tweets from the database.', 'hl-twitter'), $user->screen_name); ?></p>
 		<form method="post" action="admin.php?page=hl_twitter_users&amp;action=delete&amp;id=<?php echo $user->id; ?>">
-			<p><input type="checkbox" name="delete_tweets" id="delete_tweets" /> <label for="delete_tweets">Remove tweets from database as well?</label></p>
+			<p><input type="checkbox" name="delete_tweets" id="delete_tweets" /> <label for="delete_tweets"><?php _e('Remove tweets from database as well?', 'hl-twitter'); ?></label></p>
 			<p>
-				<a href="admin.php?page=hl_twitter_users" class="button-secondary">Cancel</a>
-				<input type="submit" name="submit" value="Delete" class="button-primary" />
+				<a href="admin.php?page=hl_twitter_users" class="button-secondary"><?php _e('Cancel', 'hl-twitter'); ?></a>
+				<input type="submit" name="submit" value="<?php _e('Delete', 'hl-twitter'); ?>" class="button-primary" />
 			</p>
 		</form>
 	</div>
 	<?php
 
-} // end func: hl_twitter_admin_delete_user
+}
 
 
 
@@ -776,7 +808,7 @@ function hl_twitter_admin_new_user() {
 
 	// Get API
 	$api = hl_twitter_get_api();
-	if(!$api) return hl_twitter_error('Could not connect to Twitter. Please make sure you have linked this plugin to your Twitter account.');
+	if(!$api) return hl_twitter_error(__('Could not connect to Twitter. Please make sure you have linked this plugin to your Twitter account.', 'hl-twitter'));
 
 
 	// User
@@ -833,17 +865,17 @@ function hl_twitter_admin_new_user() {
 								),
 								array('%s','%s','%s','%d','%d','%d','%s','%s','%s','%s','%s','%s','%s', '%d')
 							);
-							$msg_updated = hl_e($user->screen_name).' has been added to the database.<br /><a href="admin.php?page=hl_twitter_users&amp;action=edit&amp;id='.$data->id.'">View details</a> | <a href="admin.php?page=hl_twitter_users&amp;action=import&amp;id='.$data->id.'">Import tweets</a>';
+
+							$msg_updated = printf(__('%s has been added to the database.<br /><a href="%s">View details</a> | <a href="%s">Import tweets</a>', 'hl-twitter'), $user->screen_name, 'admin.php?page=hl_twitter_users&amp;action=edit&amp;id='.$data->id, 'admin.php?page=hl_twitter_users&amp;action=import&amp;id='.$data->id);
+
+						} else { $msg_error = printf(__('This user has already being added to the database of users. <a href="%s">View details</a>', 'hl-twitter'), 'admin.php?page=hl_twitter_users&amp;action=edit&amp;id=' . $user_id); }
+					} else { $msg_error = __('This persons tweets are protected and you do not have permission to view them.', 'hl-twitter'); }
+
+				} else { $msg_error = __('The selected user could not be found or there was an while contacting Twitter. Please try again later.', 'hl-twitter'); }
+			} catch(Exception $e) { $msg_error = __('The selected user could not be found or an error was encountered while contacting Twitter. Please try again later.', 'hl-twitter'); }
 
 
-						} else { $msg_error = 'This user has already being added to the database of users. <a href="admin.php?page=hl_twitter_users&amp;action=edit&amp;id='.$user_id.'">View details</a>'; }
-					} else { $msg_error = 'This persons tweets are protected and you do not have permission to view them.'; }
-
-				} else { $msg_error = 'The selected user could not be found or there was an while contacting Twitter. Please try again later.'; }
-			} catch(Exception $e) { $msg_error = 'The selected user could not be found or an error was encountered while contacting Twitter. Please try again later.'; }
-
-
-		} else { $msg_error = 'Please make sure you have entered a valid screen name.'; }
+		} else { $msg_error = __('Please make sure you have entered a valid screen name.', 'hl-twitter'); }
 
 	} // end SUBMIT
 
@@ -853,34 +885,37 @@ function hl_twitter_admin_new_user() {
 		<?php if($msg_error!=''): ?><div class="error"><p><?php echo $msg_error; ?></p></div><?php endif; ?>
 		<?php if($msg_updated!=''): ?><div class="updated"><p><?php echo $msg_updated; ?></p></div><?php endif; ?>
 
-		<h2>Add New User</h2>
-		<p>Adding a new user will record all of their future tweets and profile information, along with their most recent 3,200 tweets and any tweets they reply to (if chosen). Please be aware that only a limited number of requests can be made to Twitter per hour, adding more users may cause you to reach this limit and risk not receiving new tweets.</p>
+		<h2><?php _e('Add New User', 'hl-twitter'); ?></h2>
+		<p><?php _e('Adding a new user will record all of their future tweets and profile information, along with their most recent 3,200 tweets and any tweets they reply to (if chosen). Please be aware that only a limited number of requests can be made to Twitter per hour, adding more users may cause you to reach this limit and risk not receiving new tweets.', 'hl-twitter'); ?></p>
 
 		<form method="post" action="admin.php?page=hl_twitter_users&amp;action=new">
 			<table class="form-table">
 				<tr>
-					<th scope="row">Screen name</th>
+					<th scope="row"><?php _e('Screen name', 'hl-twitter'); ?></th>
 					<td>@<input type="text" name="screen_name" value="<?php echo hl_e($user->screen_name); ?>" class="regular-text" />
-					<br /><span class="description">For example: MyTwitterUsername, HybridLogic</span>
+					<br /><span class="description"><?php _e('For example', 'hl-twitter'); ?>: MyTwitterUsername, HybridLogic</span>
 				</tr>
 				<tr>
-					<th scope="row">Options</th>
+					<th scope="row"><?php _e('Options', 'hl-twitter'); ?></th>
 					<td>
 						<ul>
-							<li><input type="checkbox" name="import_replies" id="import_replies"<?php if($user->import_replies) echo 'checked="checked"'; ?> /> <label for="import_replies">Import any tweets that are replied to</label></li>
+							<li>
+								<input type="checkbox" name="import_replies" id="import_replies"<?php if($user->import_replies) echo 'checked="checked"'; ?> />
+								<label for="import_replies"><?php _e('Import any tweets that are replied to', 'hl-twitter'); ?></label>
+							</li>
 						</ul>
 					</td>
 				</tr>
 			</table>
 			<div class="submit">
-				<input type="submit" name="submit" value="Add User" class="button-primary" />
+				<input type="submit" name="submit" value="<?php _e('Add User', 'hl-twitter'); ?>" class="button-primary" />
 			</div>
 		</form>
 
 	</div>
 	<?php
 
-} // end func: hl_twitter_admin_new_user
+}
 
 
 
@@ -899,7 +934,7 @@ function hl_twitter_admin_import_user_tweets($id) {
 		WHERE twitter_user_id=%d
 		LIMIT 1
 	',$id));
-	if(!$user) return hl_twitter_error('The selected user could not be found.');
+	if(!$user) return hl_twitter_error(__('The selected user could not be found.', 'hl-twitter'));
 
 
 	// Num tweets
@@ -912,24 +947,24 @@ function hl_twitter_admin_import_user_tweets($id) {
 
 	?>
 	<div class="wrap">
-		<h2>Tweet Importer</h2>
+		<h2><?php _e('Tweet Importer', 'hl-twitter'); ?></h2>
 
-		<p>The HL Tweet Importer allows you to import tweets for a user and store them on your website. Due to a limitation set by Twitter, only the 3200 most recent tweets can be retrieved. This system makes very heavy use of the Twitter API, please only use it sparingly to prevent Twitter from blocking your website. Review the details below and click on the Start Import button to begin.</p>
+		<p><?php _e('The HL Tweet Importer allows you to import tweets for a user and store them on your website. Due to a limitation set by Twitter, only the 3200 most recent tweets can be retrieved. This system makes very heavy use of the Twitter API, please only use it sparingly to prevent Twitter from blocking your website. Review the details below and click on the Start Import button to begin.', 'hl-twitter'); ?></p>
 
 		<ul>
-			<li>Account name: <strong><?php echo hl_e($user->screen_name); ?></strong></li>
-			<li>Tweets made: <strong><?php echo number_format($user->num_tweets); ?></strong></li>
-			<li>Tweets in DB: <strong><?php echo number_format($tweets_in_db); ?></strong></li>
-			<li>Tweets to import: <strong><?php echo number_format($tweets_to_import); ?></strong></li>
+			<li><?php _e('Account name', 'hl-twitter'); ?>: <strong><?php echo hl_e($user->screen_name); ?></strong></li>
+			<li><?php _e('Tweets made', 'hl-twitter'); ?>: <strong><?php echo number_format($user->num_tweets); ?></strong></li>
+			<li><?php _e('Tweets in DB', 'hl-twitter'); ?>: <strong><?php echo number_format($tweets_in_db); ?></strong></li>
+			<li><?php _e('Tweets to import', 'hl-twitter'); ?>: <strong><?php echo number_format($tweets_to_import); ?></strong></li>
 		</ul>
 
-		<p id="hl_twitter_import_tweets_for_user_results"><a href="#import" id="hl_twitter_import_tweets_for_user" class="button-primary">Start Import</a></p>
+		<p id="hl_twitter_import_tweets_for_user_results"><a href="#import" id="hl_twitter_import_tweets_for_user" class="button-primary"><?php _e('Start Import', 'hl-twitter'); ?></a></p>
 
 		<script type="text/javascript" >
 		jQuery(document).ready(function($) {
 			var output = $("#hl_twitter_import_tweets_for_user_results");
 			$("#hl_twitter_import_tweets_for_user").click(function(){
-				output.html("Importing tweets... (this may take a while)");
+				output.html("<?php _e('Importing tweets... (this may take a while)', 'hl-twitter'); ?>");
 				$.post(ajaxurl, { action: 'hl_twitter_import_tweets_for_user', id: <?php echo $user->twitter_user_id; ?> }, function(response) {
 					output.html(response);
 				});
@@ -941,7 +976,7 @@ function hl_twitter_admin_import_user_tweets($id) {
 	</div>
 	<?php
 
-} // end func: hl_twitter_admin_import_user_tweets
+}
 
 
 
@@ -965,12 +1000,12 @@ function hl_twitter_import_tweets_for_user() {
 		WHERE twitter_user_id=%d
 		LIMIT 1
 	',$id));
-	if(!$user) die('The selected user could not be found.');
+	if(!$user) die(__('The selected user could not be found.', 'hl-twitter'));
 
 
 	// Get API
 	$api = hl_twitter_get_api();
-	if(!$api) die('Could not connect to Twitter. Please make sure you have linked this plugin to your Twitter account.');
+	if(!$api) die(__('Could not connect to Twitter. Please make sure you have linked this plugin to your Twitter account.', 'hl-twitter'));
 
 
 	// Set up environment + vars
@@ -979,7 +1014,7 @@ function hl_twitter_import_tweets_for_user() {
 
 	$tweets_to_import = min($user->num_tweets, HL_TWITTER_API_MAX_TWEET_LIMIT);
 	$num_pages = ceil($tweets_to_import / HL_TWITTER_API_TWEETS_PER_PAGE);
-	if($num_pages == 0) die('No tweets to be imported.');
+	if($num_pages == 0) die(__('No tweets to be imported.', 'hl-twitter'));
 
 	$sql_tweets = array();
 	$all_responses_served = false;
@@ -1041,14 +1076,14 @@ function hl_twitter_import_tweets_for_user() {
 			VALUES '.implode(', ',$sql_tweets);
 		$wpdb->query($sql);
 		$num_new_tweets = $wpdb->rows_affected;
-		echo '<p>'.$count_sql_tweets.' tweets were returned by Twitter of which '.$num_new_tweets.' were saved as new tweets.</p>';
+		printf(__('<p>%d tweets were returned by Twitter of which %d were saved as new tweets.</p>', 'hl-twitter'), $count_sql_tweets, $num_new_tweets);
 	} else {
-		echo 'No tweets were returned by the Twitter API. Please try again later.';
+		_e('No tweets were returned by the Twitter API. Please try again later.', 'hl-twitter');
 	}
 
 	die();
 
-} // end func: hl_twitter_import_tweets_for_user
+}
 
 
 
@@ -1067,13 +1102,13 @@ function hl_twitter_settings() {
 
 	// Cron frequencies
 	$frequencies = array(
-		'hl_10mins' => 'every 10 minutes',
-		'hl_15mins' => 'every 15 minutes',
-		'hl_30mins' => 'every 30 minutes',
-		'hl_1hr'    => 'every hour',
-		'hl_3hrs'   => 'every 3 hours',
-		'hl_12hrs'  => 'every 12 hours',
-		'hl_24hrs'  => 'every 24 hours'
+		'hl_10mins' => __('every 10 minutes', 'hl-twitter'),
+		'hl_15mins' => __('every 15 minutes', 'hl-twitter'),
+		'hl_30mins' => __('every 30 minutes', 'hl-twitter'),
+		'hl_1hr'    => __('every hour', 'hl-twitter'),
+		'hl_3hrs'   => __('every 3 hours', 'hl-twitter'),
+		'hl_12hrs'  => __('every 12 hours', 'hl-twitter'),
+		'hl_24hrs'  => __('every 24 hours', 'hl-twitter'),
 	);
 
 
@@ -1111,21 +1146,21 @@ function hl_twitter_settings() {
 			hl_twitter_add_rewrite_rules();
 		}
 
-		$msg_updated = 'Your settings have been saved.';
+		$msg_updated = __('Your settings have been saved.', 'hl-twitter');
 	}
 
 	?>
 	<div class="wrap">
-		<h2>Twitter Settings</h2>
+		<h2><?php _e('Twitter Settings', 'hl-twitter'); ?></h2>
 
 		<?php if($msg_updated): ?><div class="updated"><p><?php echo $msg_updated; ?></p></div><?php endif; ?>
 		<?php if($msg_error): ?><div class="error"><p><?php echo $msg_error; ?></p></div><?php endif; ?>
 
-		<p>Welcome to your HL Twitter settings page. If you wish to unlink this plugin with your Twitter account, <a href="admin.php?page=hl_twitter_settings&amp;action=unlink">click here</a>.</p>
+		<p><?php printf(__('Welcome to your HL Twitter settings page. If you wish to unlink this plugin with your Twitter account, <a href="%s">click here</a>.', 'hl-twitter'), 'admin.php?page=hl_twitter_settings&amp;action=unlink'); ?></p>
 
 
 		<div class="hl-twitter-notice-box">
-			<p>If you've found HL Twitter useful, please consider donating in order to help support it's developer. Thank you.</p>
+			<p><?php _e('If you\'ve found HL Twitter useful, please consider donating in order to help support it\'s developer. Thank you.', 'hl-twitter'); ?></p>
 			<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
 				<input type="hidden" name="cmd" value="_s-xclick">
 				<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----">
@@ -1138,42 +1173,42 @@ function hl_twitter_settings() {
 		<form method="post" action="admin.php?page=hl_twitter_settings">
 			<table class="form-table">
 				<tr>
-					<th scope="row">Tweet format</th>
+					<th scope="row"><?php _e('Tweet format', 'hl-twitter'); ?></th>
 					<td><input type="text" name="object[tweet_format]" value="<?php echo esc_attr($object->tweet_format); ?>" class="regular-text" />
 					<br />
-					<strong>Supported tags:</strong>
+					<strong><?php _e('Supported tags', 'hl-twitter'); ?>:</strong>
 					<ul>
-						<li><code>%title%</code> The post title e.g. My Blog Post</li>
-						<li><code>%permalink%</code> The link for this post e.g. mysite.com/2010/08/my-blog-post</li>
+						<li><code>%title%</code> <?php _e('The post title e.g. My Blog Post', 'hl-twitter'); ?></li>
+						<li><code>%permalink%</code> <?php _e('The link for this post e.g. mysite.com/2010/08/my-blog-post', 'hl-twitter'); ?></li>
 						<?php if(function_exists('wp_get_shortlink')): ?>
-							<li><code>%shortlink%</code> The shortlink for this post e.g. mysite.com/?p=123 or bit.ly/abc123</li>
+							<li><code>%shortlink%</code> <?php _e('The shortlink for this post e.g. mysite.com/?p=123 or bit.ly/abc123', 'hl-twitter'); ?></li>
 						<?php endif; ?>
-						<li><code>%date%</code> The date of publication as set in your Settings e.g. <?php echo date_i18n(get_option('date_format')); ?></li>
-						<li><code>%time%</code> The time of publication as set in your Settings e.g. <?php echo date_i18n(get_option('time_format')); ?></li>
-						<li><code>%categories%</code> A comma separated list of categories e.g. Movies, Games, Pictures</li>
-						<li><code>%tags%</code> A comma separated list of tags e.g. red, white, blue</li>
+						<li><code>%date%</code> <?php printf(__('The date of publication as set in your Settings e.g. %s', 'hl-twitter'), date_i18n(get_option('date_format'))); ?></li>
+						<li><code>%time%</code> <?php printf(__('The time of publication as set in your Settings e.g. %s', 'hl-twitter'), date_i18n(get_option('time_format'))); ?></li>
+						<li><code>%categories%</code> <?php _e('A comma separated list of categories e.g. Movies, Games, Pictures', 'hl-twitter'); ?></li>
+						<li><code>%tags%</code> <?php _e('A comma separated list of tags e.g. red, white, blue', 'hl-twitter'); ?></li>
 					</ul>
 				</tr>
 				<tr>
-					<th scope="row">Automatically tweet?</th>
+					<th scope="row"><?php _e('Automatically tweet?', 'hl-twitter'); ?></th>
 					<td>
 						<input type="checkbox" name="object[auto_tweet]" <?php if($object->auto_tweet): ?>checked="checked"<?php endif; ?> />
-						<br /><span class="description">If enabled, posts will be automatically tweeted when they are first published.</span>
+						<br /><span class="description"><?php _e('If enabled, posts will be automatically tweeted when they are first published.', 'hl-twitter'); ?></span>
 					</td>
 				</tr>
 
 				<tr>
-					<th scope="row">Archive Pages</th>
+					<th scope="row"><?php _e('Archive Pages', 'hl-twitter'); ?></th>
 					<td>
 						<?php bloginfo('wpurl'); ?>/<input type="text" name="object[archive_slug]" value="<?php echo hl_e($object->archive_slug); ?>" class="regular-text" />
-						<br /><span class="description">The slug for your HL Twitter archives</span>
+						<br /><span class="description"><?php _e('The slug for your HL Twitter archives', 'hl-twitter'); ?></span>
 					</td>
 				</tr>
 
 				<tr>
-					<th scope="row">Frequency</th>
+					<th scope="row"><?php _e('Frequency', 'hl-twitter'); ?></th>
 					<td>
-						Check for new tweets:
+						<?php _e('Check for new tweets', 'hl-twitter'); ?>:
 						<select name="object[update_frequency]">
 							<?php foreach($frequencies as $k=>$v): ?>
 								<option value="<?php echo $k; ?>" <?php if($object->update_frequency==$k) echo 'selected="selected"'; ?>><?php echo $v; ?></option>
@@ -1185,7 +1220,7 @@ function hl_twitter_settings() {
 			</table>
 
 			<div class="submit">
-				<input type="submit" name="submit" value="Save" class="button-primary" />
+				<input type="submit" name="submit" value="<?php _e('Save', 'hl-twitter'); ?>" class="button-primary" />
 			</div>
 
 		</form>
@@ -1204,7 +1239,7 @@ function hl_twitter_settings() {
 
 	<?php
 
-} // end func: hl_twitter_settings
+}
 
 
 
@@ -1220,9 +1255,9 @@ function hl_twitter_admin_unlink() {
 		update_option(HL_TWITTER_OAUTH_TOKEN_SECRET, '');
 		?>
 		<div class="wrap">
-			<h2>Unlink Account</h2>
-			<p>This plugin has now been unlinked.</p>
-			<p><a href="admin.php?page=hl_twitter" class="button-primary">Continue</a></p>
+			<h2><?php _e('Unlink Account', 'hl-twitter'); ?></h2>
+			<p><?php _e('This plugin has now been unlinked.', 'hl-twitter'); ?></p>
+			<p><a href="admin.php?page=hl_twitter" class="button-primary"><?php _e('Continue', 'hl-twitter'); ?></a></p>
 		</div>
 		<?php
 		return;
@@ -1230,18 +1265,18 @@ function hl_twitter_admin_unlink() {
 
 	?>
 	<div class="wrap">
-		<h2>Unlink Account</h2>
-		<p>Are you sure you wish to unlink this plugin with its current Twitter account? You will not be able to use this plugin until it has been linked with a Twitter account.</p>
+		<h2><?php _e('Unlink Account', 'hl-twitter'); ?></h2>
+		<p><?php _e('Are you sure you wish to unlink this plugin with its current Twitter account? You will not be able to use this plugin until it has been linked with a Twitter account.', 'hl-twitter'); ?></p>
 		<form method="post" action="admin.php?page=hl_twitter_settings&amp;action=unlink">
 			<p>
-				<a href="admin.php?page=hl_twitter_settings" class="button-secondary">Cancel</a>
-				<input type="submit" name="submit" value="Unlink" class="button-primary" />
+				<a href="admin.php?page=hl_twitter_settings" class="button-secondary"><?php _e('Cancel', 'hl-twitter'); ?></a>
+				<input type="submit" name="submit" value="<?php _e('Unlink', 'hl-twitter'); ?>" class="button-primary" />
 			</p>
 		</form>
 	</div>
 	<?php
 
-} // end func: hl_twitter_admin_unlink
+}
 
 
 
@@ -1257,7 +1292,12 @@ function hl_twitter_admin_authorize_oauth() {
 
 	// They already have a token
 	if(hl_twitter_is_oauth_verified()) {
-		echo '<div class="wrap"><h2>Connect to Twitter</h2><p>This plugin has already being linked to a Twitter account. To unlink, <a href="admin.php?page=hl_twitter_settings&amp;action=unlink">click here</a></p></div>';
+		echo '
+			<div class="wrap">
+				<h2>Connect to Twitter</h2>
+				<p>This plugin has already being linked to a Twitter account. To unlink, <a href="admin.php?page=hl_twitter_settings&amp;action=unlink">click here</a></p>
+			</div>
+		';
 		return;
 	}
 
@@ -1271,17 +1311,32 @@ function hl_twitter_admin_authorize_oauth() {
 			$token = $api->getAccessToken(array('oauth_verifier'=>$_GET['oauth_verifier']));
 			$api->setToken($token->oauth_token, $token->oauth_token_secret);
 		} catch(Exception $e) {
-			echo '<div class="wrap"><h2>Connect to Twitter</h2><p>An error occurred while trying to connect to Twitter. Please try again later.</p></div>';
+			echo '
+				<div class="wrap">
+					<h2>' . __('Connect to Twitter', 'hl-twitter') . '</h2>
+					<p>' . __('An error occurred while trying to connect to Twitter. Please try again later', 'hl-twitter') . '</p>
+				</div>
+			';
 			return;
 		}
 
 		if($token and !empty($token->oauth_token) and !empty($token->oauth_token_secret)) {
 			update_option(HL_TWITTER_OAUTH_TOKEN, $token->oauth_token);
 			update_option(HL_TWITTER_OAUTH_TOKEN_SECRET, $token->oauth_token_secret);
-			echo '<div class="wrap"><h2>Connect to Twitter</h2><p>You have successfully linked to Twitter.</p><p><a href="admin.php?page=hl_twitter">View tweets</a> | <a href="admin.php?page=hl_twitter_users&amp;action=new">Add a new user</a></p></div>';
+			echo '
+				<div class="wrap">
+					<h2>' . __('Connect to Twitter', 'hl-twitter') . '</h2>
+					<p>' . sprintf(__('You have successfully linked to Twitter.</p><p><a href="%s">View tweets</a> | <a href="%s">Add a new user</a>', 'hl-twitter'), 'admin.php?page=hl_twitter', 'admin.php?page=hl_twitter_users&amp;action=new') . '</p>
+				</div>
+			';
 			return;
 		} else {
-			echo '<div class="wrap"><h2>Connect to Twitter</h2><p>An error occurred while reading the response from Twitter. Please try again.</p></div>';
+			echo '
+				<div class="wrap">
+					<h2>' . __('Connect to Twitter', 'hl-twitter') . '</h2>
+					<p>' . __('An error occurred while reading the response from Twitter. Please try again.', 'hl-twitter') . '</p>
+				</div>
+			';
 			return;
 		}
 
@@ -1290,7 +1345,7 @@ function hl_twitter_admin_authorize_oauth() {
 
 	// Check cURL support
 	if(!function_exists('curl_exec')) {
-		return hl_twitter_error('cURL support was not found on this server. Please make sure cURL is enabled for PHP and try again.');
+		return hl_twitter_error(__('cURL support was not found on this server. Please make sure cURL is enabled for PHP and try again.', 'hl-twitter'));
 	}
 
 
@@ -1298,9 +1353,9 @@ function hl_twitter_admin_authorize_oauth() {
 	?>
 
 	<div class="wrap">
-		<h2>Connect to Twitter</h2>
-		<p>To use HL Twitter you must first authorise it via Twitter. To connect, click on the link below.</p>
-		<p id="hl_twitter_oauth_get_authorize_url">Loading...</p>
+		<h2><?php _e('Connect to Twitter', 'hl-twitter'); ?></h2>
+		<p><?php _e('To use HL Twitter you must first authorise it via Twitter. To connect, click on the link below.', 'hl-twitter'); ?></p>
+		<p id="hl_twitter_oauth_get_authorize_url"><?php _e('Loading...', 'hl-twitter'); ?></p>
 	</div>
 
 	<script type="text/javascript" >
@@ -1313,7 +1368,7 @@ function hl_twitter_admin_authorize_oauth() {
 
 	<?php
 
-} // end func: hl_twitter_admin_authorize_oauth
+}
 
 
 
@@ -1329,14 +1384,14 @@ function hl_twitter_oauth_get_authorize_url() {
 	try {
 		$api = new EpiTwitter(HL_TWITTER_OAUTH_CONSUMER_KEY, HL_TWITTER_OAUTH_CONSUMER_SECRET);
 		$url = $api->getAuthenticateUrl(null, array('oauth_callback'=>HL_TWITTER_OAUTH_CALLBACK));
-		echo '<a href="'.$url.'" class="button-primary">Connect to Twitter</a>';
+		echo '<a href="'.$url.'" class="button-primary">' . __('Connect to Twitter', 'hl-twitter') . '</a>';
 	} catch(Exception $e) {
-		echo 'Could not connect to Twitter';
+		echo __('Could not connect to Twitter', 'hl-twitter');
 	}
 
 	die();
 
-} // end func: hl_twitter_oauth_get_authorize_url
+}
 
 
 
@@ -1349,15 +1404,15 @@ function hl_twitter_error($msg=false) {
 ?>
 	<div class="wrap">
 
-		<h2>An Error Occurred</h2>
+		<h2><?php _e('An Error Occurred', 'hl-twitter'); ?></h2>
 
 		<?php if(!empty($msg)): ?>
 			<div class="error"><p><?php echo $msg; ?></p></div>
 		<?php endif; ?>
 
-		<p>Unfortunately an error occurred while trying to handle your request that the system could not resolve. Please try again.</p>
+		<p><?php _e('Unfortunately an error occurred while trying to handle your request that the system could not resolve. Please try again.', 'hl-twitter'); ?></p>
 
 	</div>
 <?php
-} // end func: hl_twitter_error
+}
 
